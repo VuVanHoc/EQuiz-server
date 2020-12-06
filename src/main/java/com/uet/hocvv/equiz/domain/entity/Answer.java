@@ -6,11 +6,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Document(collection = "activity")
-public class Activity extends BaseEntity {
+@Document(collection = "answer")
+public class Answer extends BaseEntity{
 	
-	private String title;
+	private String content;
 	private String description;
-	private String code;
-	private String createdBy;
+	private String questionId;
+	private Boolean isCorrect;
+	
 }

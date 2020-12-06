@@ -20,12 +20,17 @@
     <profiles>
         <profile>
             <id>localhost</id>
-        </profile>
-        <profile>
-            <id>dev</id>
+            <properties>
+                <active.mode>localhost</active.mode>
+                <data.mongodb.uri>mongodb://localhost:27017/equiz</data.mongodb.uri>
+            </properties>
         </profile>
         <profile>
             <id>prod</id>
+            <properties>
+                <active.mode>prod</active.mode>
+                <data.mongodb.uri>mongodb://localhost:27017/equiz</data.mongodb.uri>
+            </properties>
         </profile>
     </profiles>
 
@@ -135,6 +140,19 @@
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>2.3.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-mail -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>2.3.5.RELEASE</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.11</version>
         </dependency>
 
     </dependencies>

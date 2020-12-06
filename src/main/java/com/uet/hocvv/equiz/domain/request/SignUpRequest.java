@@ -8,8 +8,8 @@ public class SignUpRequest {
 	private String username;
 	private String password;
 	private String confirmPassword;
-	private Long birthday;
-	private Boolean gender;
-//	private
-	
+	private String firstName;
+	private String lastName;
+	private String userType;
+	private String gender;
 }

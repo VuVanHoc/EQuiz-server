@@ -34,7 +34,7 @@ public class AuthController {
 	}
 	
 	@PostMapping("/login")
-	public ResponseEntity authenticateUser(@RequestBody LoginRequest loginRequest) {
+	public ResponseEntity<Object> authenticateUser(@RequestBody LoginRequest loginRequest) {
 		System.out.println("Request body:" + loginRequest);
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
@@ -49,9 +49,9 @@ public class AuthController {
 	}
 	
 	@PostMapping("/signup")
-	public ResponseEntity signUp(@RequestBody SignUpRequest signUpRequest) {
+	public ResponseEntity<Object> signUp(@RequestBody SignUpRequest signUpRequest) throws Exception {
 		
-		RestBody restBody = userService.createUser(signUpRequest);
+		RestBody restBody = RestBody.success(userService.signUp(signUpRequest));
 		return ResponseEntity.ok(restBody);
 	}
 }

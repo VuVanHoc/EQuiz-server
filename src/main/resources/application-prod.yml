@@ -1,4 +1,0 @@
-spring:
-  data:
-    mongodb:
-      uri: mongodb+srv://vuvanhoc:Vuvanhoc1999@equiz-cluster0.zjcyr.mongodb.net/test?authSource=admin&replicaSet=atlas-ofy9vc-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true

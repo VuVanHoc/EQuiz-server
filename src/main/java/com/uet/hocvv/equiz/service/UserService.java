@@ -1,22 +1,22 @@
 package com.uet.hocvv.equiz.service;
 
-import com.uet.hocvv.equiz.domain.RestBody;
 import com.uet.hocvv.equiz.domain.entity.User;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
 
+import java.util.List;
+
 public interface UserService {
 	
+	User signUp(SignUpRequest signUpRequest) throws Exception;
 	
-	RestBody getUserById(String id);
+	User getUserById(String id);
 	
-	RestBody getUserByEmail(String email);
+	User createUser(SignUpRequest createUserRequest);
 	
-	RestBody createUser(SignUpRequest createUserRequest);
+	User updateUser(User user);
 	
-	RestBody updateUser(User user);
+	List<User> getAllUser();
 	
-	RestBody getAllUser();
-	
-	RestBody deleteUser(String userId);
+	String deleteUser(String userId);
 	
 }
