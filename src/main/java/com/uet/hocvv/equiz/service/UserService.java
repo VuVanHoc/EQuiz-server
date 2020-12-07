@@ -9,6 +9,8 @@ public interface UserService {
 	
 	User signUp(SignUpRequest signUpRequest) throws Exception;
 	
+	User verifyAccount(String username) throws Exception;
+	
 	User getUserById(String id);
 	
 	User createUser(SignUpRequest createUserRequest);

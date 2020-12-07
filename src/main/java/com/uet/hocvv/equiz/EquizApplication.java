@@ -1,12 +1,12 @@
 package com.uet.hocvv.equiz;
 
-import com.uet.hocvv.equiz.repository.UserRepository;
+import com.uet.hocvv.equiz.utils.JwtAuthenticationFilter;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
@@ -16,18 +16,25 @@ public class EquizApplication implements CommandLineRunner {
 		SpringApplication.run(EquizApplication.class, args);
 	}
 	
-	@Autowired
-	UserRepository userRepository;
-	@Autowired
-	PasswordEncoder passwordEncoder;
+	@Bean
+	public JwtAuthenticationFilter jwtAuthenticationFilter() {
+		return new JwtAuthenticationFilter();
+	}
 	
-	@Override
-	public void run(String... args) throws Exception {
 	
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 	
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
+	}
+	
+	
+	@Override
+	public void run(String... args) throws Exception {
+	
 	}
 }

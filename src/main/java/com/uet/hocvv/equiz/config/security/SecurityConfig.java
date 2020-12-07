@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -18,16 +17,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
 	UserServiceImpl userService;
+	@Autowired
+	PasswordEncoder passwordEncoder;
+	@Autowired
+	JwtAuthenticationFilter jwtAuthenticationFilter;
 	
-	@Bean
-	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter();
-	}
-	
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
 	
 	@Bean
 	@Override
@@ -39,7 +33,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(AuthenticationManagerBuilder auth)
 			throws Exception {
 		auth.userDetailsService(userService) // Cung cáp userservice cho spring security
-				.passwordEncoder(passwordEncoder()); // cung cấp password encoder
+				.passwordEncoder(passwordEncoder); // cung cấp password encoder
 	}
 	
 	@Override
@@ -48,7 +42,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.and().csrf().disable()
 				.authorizeRequests()
 				.antMatchers("/api/auth/login/**",
-						"/api/auth/signup/**")
+						"/api/auth/signup/**",
+						"/verifyEmail")
 				.permitAll()
 				.antMatchers("/v3/api-docs",
 						"/v2/api-docs",
@@ -57,9 +52,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 						"/configuration/ui",
 						"/configuration/security",
 						"/swagger-ui/**",
-						"/webjars/**").permitAll()
+						"/webjars/**",
+						"/resources/**").permitAll()
 				.anyRequest().authenticated();
-		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 	
 	

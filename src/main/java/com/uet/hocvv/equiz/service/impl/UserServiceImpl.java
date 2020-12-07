@@ -14,13 +14,14 @@ import com.uet.hocvv.equiz.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -38,6 +39,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	PasswordEncoder passwordEncoder;
 	@Autowired
 	EmailServiceImpl emailService;
+	@Value("${prefix.url}")
+	String prefixUrl;
 	
 	
 	//	using for Spring security
@@ -84,7 +87,24 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			teacher.setGender(signUpRequest.getGender());
 			teacherRepository.save(teacher);
 		}
+		Map<String, Object> params = new HashMap<>();
+		params.put("param1", signUpRequest.getLastName() + " " + signUpRequest.getFirstName());
+		params.put("param2", prefixUrl + "/verifyEmail?id=" + user.getId());
+		emailService.sendEmail(signUpRequest.getUsername(), "Xác nhận đăng ký tài khoản", "ConfirmSignUp.html", params);
 		return user;
+	}
+	
+	@Override
+	public User verifyAccount(String id) throws Exception {
+		Optional<User> optionalUser = userRepository.findById(id);
+		
+		if (!optionalUser.isPresent()) {
+			throw new Exception(MessageError.USER_NOT_FOUND.toString());
+		}
+		User user = optionalUser.get();
+		user.setActive(true);
+		user.setUpdatedDate(new Date());
+		return userRepository.save(user);
 	}
 	
 	@Override

@@ -23,13 +23,17 @@
             <properties>
                 <active.mode>localhost</active.mode>
                 <data.mongodb.uri>mongodb://localhost:27017/equiz</data.mongodb.uri>
+                <prefix.url>http://localhost:8890</prefix.url>
             </properties>
         </profile>
         <profile>
             <id>prod</id>
             <properties>
                 <active.mode>prod</active.mode>
-                <data.mongodb.uri>mongodb://localhost:27017/equiz</data.mongodb.uri>
+                <data.mongodb.uri>mongodb+srv://vuvanhoc:n40AtfbnOxMXKrpk@cluster0.zjcyr.mongodb.net/equiz?retryWrites=true&amp;w=majority</data.mongodb.uri>
+                <data.mongodb.password>n40AtfbnOxMXKrpk</data.mongodb.password>
+                <data.mongodb.username>vuvanhoc</data.mongodb.username>
+                <prefix.url>http://localhost:8890</prefix.url>
             </properties>
         </profile>
     </profiles>
@@ -45,6 +49,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-quartz</artifactId>
         </dependency>
         <dependency>
@@ -55,6 +63,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-freemarker -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
