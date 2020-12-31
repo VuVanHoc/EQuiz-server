@@ -6,11 +6,13 @@ import com.uet.hocvv.equiz.domain.entity.Student;
 import com.uet.hocvv.equiz.domain.entity.Teacher;
 import com.uet.hocvv.equiz.domain.entity.User;
 import com.uet.hocvv.equiz.domain.enu.UserType;
+import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
 import com.uet.hocvv.equiz.repository.StudentRepository;
 import com.uet.hocvv.equiz.repository.TeacherRepository;
 import com.uet.hocvv.equiz.repository.UserRepository;
 import com.uet.hocvv.equiz.service.UserService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +43,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	EmailServiceImpl emailService;
 	@Value("${prefix.url}")
 	String prefixUrl;
-	
+	@Value("${default.password.user}")
+	String defaultPassword;
 	
 	//	using for Spring security
 	@Override
@@ -132,6 +135,31 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	@Override
 	public String deleteUser(String userId) {
 		return null;
+	}
+	
+	@Override
+	public void changePassword(ChangePasswordRequest changePasswordRequest) throws Exception {
+		Optional<User> user = userRepository.findById(changePasswordRequest.getUserId());
+		if(!user.isPresent()) {
+			throw new Exception(MessageError.USER_NOT_FOUND.toString());
+		}
+		user.get().setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+		userRepository.save(user.get());
+	}
+	
+	@Override
+	public void forgotPassword(String userId) throws Exception {
+		Optional<User> user = userRepository.findById(userId);
+		if(!user.isPresent()) {
+			throw new Exception(MessageError.USER_NOT_FOUND.toString());
+		}
+		String newPass = RandomStringUtils.randomAlphanumeric(6);
+		user.get().setPassword(passwordEncoder.encode(newPass));
+		userRepository.save(user.get());
+		
+		Map<String, Object> params = new HashMap<>();
+//		params.put("fullname", )
+		emailService.sendEmail(user.get().getUsername(), "Quên mật khẩu", "ForgotPassword.html", params);
 	}
 	
 	private User convertDtoToEntity(SignUpRequest signUpRequest) {

@@ -1,11 +1,11 @@
 package com.uet.hocvv.equiz.controller;
 
+import com.uet.hocvv.equiz.domain.RestBody;
+import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
 import com.uet.hocvv.equiz.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/user")
@@ -22,5 +22,19 @@ public class UserController {
 	@GetMapping("getUserInfo")
 	public ResponseEntity<Object> getUserInfo() {
 		return ResponseEntity.ok(null);
+	}
+	
+	@PostMapping("changePassword")
+	public ResponseEntity<Object> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) throws Exception {
+		userService.changePassword(changePasswordRequest);
+		RestBody restBody = RestBody.success(null);
+		return ResponseEntity.ok(restBody);
+	}
+	
+	@GetMapping("forgotPassword")
+	public ResponseEntity<Object> forgotPassword(@RequestParam(name = "id") String userId) throws Exception {
+		userService.forgotPassword(userId);
+		RestBody restBody = RestBody.success(null);
+		return ResponseEntity.ok(restBody);
 	}
 }
