@@ -30,9 +30,9 @@
             <id>prod</id>
             <properties>
                 <active.mode>prod</active.mode>
-                <data.mongodb.uri>mongodb+srv://vuvanhoc:n40AtfbnOxMXKrpk@cluster0.zjcyr.mongodb.net/equiz?retryWrites=true&amp;w=majority</data.mongodb.uri>
-                <data.mongodb.password>n40AtfbnOxMXKrpk</data.mongodb.password>
-                <data.mongodb.username>vuvanhoc</data.mongodb.username>
+                <data.mongodb.uri>mongodb+srv://equiz2021:hBMPHAmaWxrqJkmR@cluster0.zjcyr.mongodb.net/equiz?retryWrites=true&amp;w=majority</data.mongodb.uri>
+                <data.mongodb.password>hBMPHAmaWxrqJkmR</data.mongodb.password>
+                <data.mongodb.username>equiz2021</data.mongodb.username>
                 <prefix.url>http://localhost:8890</prefix.url>
             </properties>
         </profile>
