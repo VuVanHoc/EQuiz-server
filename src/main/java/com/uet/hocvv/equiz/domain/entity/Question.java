@@ -13,9 +13,7 @@ import java.util.List;
 public class Question  extends BaseEntity{
 	
 	private String content;
-	private String description;
-	private QuestionType questionType;
+	private QuestionType type;
 	private String createdBy;
-	private List<String> hashTag;
 	
 }

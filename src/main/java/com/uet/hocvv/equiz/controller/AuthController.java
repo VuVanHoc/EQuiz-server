@@ -5,6 +5,7 @@ import com.uet.hocvv.equiz.domain.RestBody;
 import com.uet.hocvv.equiz.domain.request.LoginRequest;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
 import com.uet.hocvv.equiz.domain.response.LoginResponse;
+import com.uet.hocvv.equiz.domain.response.UserDTO;
 import com.uet.hocvv.equiz.service.impl.UserServiceImpl;
 import com.uet.hocvv.equiz.utils.JwtTokenProvider;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class AuthController {
 	}
 	
 	@PostMapping("/login")
-	public ResponseEntity<Object> authenticateUser(@RequestBody LoginRequest loginRequest) {
+	public ResponseEntity<Object> authenticateUser(@RequestBody LoginRequest loginRequest) throws Exception {
 		System.out.println("Request body:" + loginRequest);
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
@@ -44,7 +45,14 @@ public class AuthController {
 		);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = tokenProvider.generateToken((CustomUserDetails) authentication.getPrincipal());
-		RestBody restBody = RestBody.success(new LoginResponse(jwt));
+		
+		LoginResponse loginResponse = new LoginResponse();
+		loginResponse.setAccessToken(jwt);
+		
+		UserDTO userDTO = userService.populateUserInfo(loginRequest.getUsername());
+		loginResponse.setUserDTO(userDTO);
+		
+		RestBody restBody = RestBody.success(loginResponse);
 		return ResponseEntity.ok(restBody);
 	}
 	

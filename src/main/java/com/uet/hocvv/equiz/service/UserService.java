@@ -2,7 +2,9 @@ package com.uet.hocvv.equiz.service;
 
 import com.uet.hocvv.equiz.domain.entity.User;
 import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
+import com.uet.hocvv.equiz.domain.request.ForgotPasswordRequest;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
+import com.uet.hocvv.equiz.domain.response.UserDTO;
 
 import java.util.List;
 
@@ -24,5 +26,7 @@ public interface UserService {
 	
 	void changePassword(ChangePasswordRequest changePasswordRequest) throws Exception;
 	
-	void forgotPassword(String userId) throws Exception;
+	String forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws Exception;
+	
+	void verifyForgotPassword(String email, String pass, Long expriedTime) throws Exception;
 }

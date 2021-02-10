@@ -10,8 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Answer extends BaseEntity{
 	
 	private String content;
-	private String description;
 	private String questionId;
-	private Boolean isCorrect;
+	private Boolean correct;
 	
 }

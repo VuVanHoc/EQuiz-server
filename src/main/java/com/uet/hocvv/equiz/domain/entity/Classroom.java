@@ -19,10 +19,9 @@ public class Classroom extends BaseEntity {
 	private String code;
 	private String description;
 	private String password;
-	private boolean isPublic;
+	private Boolean isPrivate;
 	private String createdBy;
 	private String responsible;
 	private String link;
-	private Double ratingNumber;
 	
 }

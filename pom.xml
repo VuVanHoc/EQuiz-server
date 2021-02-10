@@ -24,16 +24,18 @@
                 <active.mode>localhost</active.mode>
                 <data.mongodb.uri>mongodb://localhost:27017/equiz</data.mongodb.uri>
                 <prefix.url>http://localhost:8890</prefix.url>
+                <web.url>http://localhost:9000</web.url>
             </properties>
         </profile>
         <profile>
-            <id>prod</id>
+            <id>production</id>
             <properties>
-                <active.mode>prod</active.mode>
+                <active.mode>production</active.mode>
                 <data.mongodb.uri>mongodb+srv://equiz2021:hBMPHAmaWxrqJkmR@cluster0.zjcyr.mongodb.net/equiz?retryWrites=true&amp;w=majority</data.mongodb.uri>
                 <data.mongodb.password>hBMPHAmaWxrqJkmR</data.mongodb.password>
                 <data.mongodb.username>equiz2021</data.mongodb.username>
-                <prefix.url>http://localhost:8890</prefix.url>
+                <prefix.url>http://54.251.91.8:8890</prefix.url>
+                <web.url>http://54.179.82.26/</web.url>
             </properties>
         </profile>
     </profiles>
