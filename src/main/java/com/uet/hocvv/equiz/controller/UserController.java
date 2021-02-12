@@ -37,7 +37,7 @@ public class UserController {
 	@PostMapping("forgotPassword")
 	public ResponseEntity<Object> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) throws Exception {
 		String result = userService.forgotPassword(forgotPasswordRequest);
-		RestBody restBody = RestBody.success(result);
+		RestBody restBody = RestBody.success(null);
 		return ResponseEntity.ok(restBody);
 	}
 }
