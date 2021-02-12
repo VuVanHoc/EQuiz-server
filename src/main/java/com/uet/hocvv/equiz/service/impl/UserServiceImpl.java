@@ -1,20 +1,24 @@
 package com.uet.hocvv.equiz.service.impl;
 
-import com.uet.hocvv.equiz.common.MessageError;
+import com.uet.hocvv.equiz.common.CommonMessage;
 import com.uet.hocvv.equiz.config.security.CustomUserDetails;
 import com.uet.hocvv.equiz.domain.entity.Student;
 import com.uet.hocvv.equiz.domain.entity.Teacher;
 import com.uet.hocvv.equiz.domain.entity.User;
 import com.uet.hocvv.equiz.domain.enu.UserType;
 import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
+import com.uet.hocvv.equiz.domain.request.ForgotPasswordRequest;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
+import com.uet.hocvv.equiz.domain.response.UserDTO;
 import com.uet.hocvv.equiz.repository.StudentRepository;
 import com.uet.hocvv.equiz.repository.TeacherRepository;
 import com.uet.hocvv.equiz.repository.UserRepository;
 import com.uet.hocvv.equiz.service.UserService;
-import org.apache.commons.lang3.RandomStringUtils;
+import com.uet.hocvv.equiz.utils.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -46,6 +50,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	@Value("${default.password.user}")
 	String defaultPassword;
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+	
 	//	using for Spring security
 	@Override
 	public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -59,39 +65,32 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	@Override
 	public User signUp(SignUpRequest signUpRequest) throws Exception {
 		if (StringUtils.isEmpty(signUpRequest.getUsername())) {
-			throw new Exception(MessageError.USERNAME_IS_REQUIRED.toString());
+			throw new Exception(CommonMessage.USERNAME_IS_REQUIRED.toString());
 		}
 		
 		User user = userRepository.findByUsername(signUpRequest.getUsername());
 		if (user != null) {
-			throw new Exception(MessageError.USERNAME_EXISTED.toString());
+			throw new Exception(CommonMessage.USERNAME_EXISTED.toString());
 		}
 		user = new User();
 		user.setUsername(signUpRequest.getUsername());
 		user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+		user.setFullName(signUpRequest.getFullname());
 		if (UserType.STUDENT.toString().equals(signUpRequest.getUserType())) {
 			user.setUserType(UserType.STUDENT);
 			userRepository.save(user);
-			
 			Student student = new Student();
 			student.setUserId(user.getId());
-			student.setFirstName(signUpRequest.getFirstName());
-			student.setLastName(signUpRequest.getLastName());
-			student.setGender(signUpRequest.getGender());
 			studentRepository.save(student);
 		} else {
 			user.setUserType((UserType.TEACHER));
 			userRepository.save(user);
-			
 			Teacher teacher = new Teacher();
 			teacher.setUserId(user.getId());
-			teacher.setFirstName(signUpRequest.getFirstName());
-			teacher.setLastName(signUpRequest.getLastName());
-			teacher.setGender(signUpRequest.getGender());
 			teacherRepository.save(teacher);
 		}
 		Map<String, Object> params = new HashMap<>();
-		params.put("param1", signUpRequest.getLastName() + " " + signUpRequest.getFirstName());
+		params.put("param1", signUpRequest.getFullname());
 		params.put("param2", prefixUrl + "/verifyEmail?id=" + user.getId());
 		emailService.sendEmail(signUpRequest.getUsername(), "Xác nhận đăng ký tài khoản", "ConfirmSignUp.html", params);
 		return user;
@@ -102,7 +101,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		Optional<User> optionalUser = userRepository.findById(id);
 		
 		if (!optionalUser.isPresent()) {
-			throw new Exception(MessageError.USER_NOT_FOUND.toString());
+			throw new Exception(CommonMessage.USER_NOT_FOUND.toString());
 		}
 		User user = optionalUser.get();
 		user.setActive(true);
@@ -140,26 +139,80 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	@Override
 	public void changePassword(ChangePasswordRequest changePasswordRequest) throws Exception {
 		Optional<User> user = userRepository.findById(changePasswordRequest.getUserId());
-		if(!user.isPresent()) {
-			throw new Exception(MessageError.USER_NOT_FOUND.toString());
+		if (!user.isPresent()) {
+			throw new Exception(CommonMessage.USER_NOT_FOUND.toString());
 		}
 		user.get().setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
 		userRepository.save(user.get());
 	}
 	
 	@Override
-	public void forgotPassword(String userId) throws Exception {
-		Optional<User> user = userRepository.findById(userId);
-		if(!user.isPresent()) {
-			throw new Exception(MessageError.USER_NOT_FOUND.toString());
+	public String forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws Exception {
+		User user = userRepository.findByUsername(forgotPasswordRequest.getEmail());
+		if (user == null) {
+			throw new Exception(CommonMessage.USER_NOT_FOUND.toString());
 		}
-		String newPass = RandomStringUtils.randomAlphanumeric(6);
-		user.get().setPassword(passwordEncoder.encode(newPass));
-		userRepository.save(user.get());
-		
+		String password = forgotPasswordRequest.getNewPassword();
+		long expriedTime = new Date().getTime() + Constants.LINK_EXPRIED;
+		String url = prefixUrl + "/verifyForgotPassword?email=" + forgotPasswordRequest.getEmail() + "&pass=" + password + "&expriedTime=" + expriedTime;
 		Map<String, Object> params = new HashMap<>();
-//		params.put("fullname", )
-		emailService.sendEmail(user.get().getUsername(), "Quên mật khẩu", "ForgotPassword.html", params);
+		params.put("param1", user.getFullName());
+		params.put("param2", url);
+		emailService.sendEmail(user.getUsername(), "Quên mật khẩu", "ForgotPassword.html", params);
+		return CommonMessage.SUCCESS.toString();
+	}
+	
+	@Override
+	public void verifyForgotPassword(String email, String pass, Long expriedTime) throws Exception {
+		if (expriedTime < new Date().getTime()) {
+			throw new Exception(CommonMessage.VERIFY_LINK_HAS_EXPRIED.toString());
+		}
+		User user = userRepository.findByUsername(email);
+		if (user == null) {
+			throw new Exception(CommonMessage.USER_NOT_FOUND.toString());
+		}
+		user.setPassword(passwordEncoder.encode(pass));
+		user.setUpdatedDate(new Date());
+		userRepository.save(user);
+	}
+	
+	public UserDTO populateUserInfo(String username) throws Exception {
+		User user = userRepository.findByUsername(username);
+		if (user == null) {
+			throw new Exception(CommonMessage.USER_NOT_FOUND.toString());
+		}
+		UserDTO userDTO = new UserDTO();
+		userDTO.setFullName(user.getFullName());
+		userDTO.setUserType(user.getUserType().toString());
+		switch (user.getUserType()) {
+			case TEACHER:
+				Teacher teacher = teacherRepository.findByUserId(user.getId());
+				userDTO.setAddress(teacher.getAddress());
+				userDTO.setAvatar(user.getAvatar());
+				userDTO.setBirthday(teacher.getBirthDay());
+				userDTO.setDefaultColor(user.getDefaultColor());
+				userDTO.setEmail(teacher.getEmail());
+				userDTO.setPhone(teacher.getPhone());
+				if(teacher.getGender() != null) {
+					userDTO.setGender(teacher.getGender().toString());
+				}
+				userDTO.setWorkplace(teacher.getWorkplace());
+				userDTO.setPrefixJob(teacher.getPrefixJob());
+				break;
+			case STUDENT:
+				Student student = studentRepository.findByUserId(user.getId());
+				userDTO.setAddress(student.getAddress());
+				userDTO.setAvatar(user.getAvatar());
+				userDTO.setBirthday(student.getBirthday());
+				userDTO.setDefaultColor(user.getDefaultColor());
+				userDTO.setEmail(student.getEmail());
+				userDTO.setPhone(student.getPhone());
+				if(student.getGender() != null) {
+					userDTO.setGender(student.getGender().toString());
+				}
+				break;
+		}
+		return userDTO;
 	}
 	
 	private User convertDtoToEntity(SignUpRequest signUpRequest) {

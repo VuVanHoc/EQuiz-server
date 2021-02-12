@@ -43,7 +43,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.authorizeRequests()
 				.antMatchers("/api/auth/login/**",
 						"/api/auth/signup/**",
-						"/verifyEmail")
+						"/verifyEmail",
+						"/api/user/forgotPassword",
+						"/verifyForgotPassword/**"
+				)
 				.permitAll()
 				.antMatchers("/v3/api-docs",
 						"/v2/api-docs",

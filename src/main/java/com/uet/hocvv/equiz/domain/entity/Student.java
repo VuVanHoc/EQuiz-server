@@ -13,11 +13,9 @@ import java.util.Date;
 public class Student extends BaseEntity {
 	
 	private String userId;
-	private String firstName;
-	private String lastName;
 	private String email;
 	private String phone;
 	private String address;
 	private Date birthday;
-	private String gender;
+	private GenderType gender;
 }

@@ -16,7 +16,11 @@ public class User extends BaseEntity {
 	
 	private String username;
 	private String password;
+	private String fullName;
 	private UserType userType;
 	private Boolean active = false;
+	private String defaultColor;
+	private String avatar;
+	
 	
 }
