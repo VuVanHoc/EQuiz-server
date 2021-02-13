@@ -76,6 +76,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		user.setUsername(signUpRequest.getUsername());
 		user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 		user.setFullName(signUpRequest.getFullname());
+		user.setDefaultColor(generateRandomColor());
 		if (UserType.STUDENT.toString().equals(signUpRequest.getUserType())) {
 			user.setUserType(UserType.STUDENT);
 			userRepository.save(user);
@@ -94,6 +95,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		params.put("param2", prefixUrl + "/verifyEmail?id=" + user.getId());
 		emailService.sendEmail(signUpRequest.getUsername(), "Xác nhận đăng ký tài khoản", "ConfirmSignUp.html", params);
 		return user;
+	}
+	
+	private String generateRandomColor() {
+		int random = new Random().nextInt(Constants.COLOR_TYPE.length);
+		return Constants.COLOR_TYPE[random];
 	}
 	
 	@Override
@@ -193,7 +199,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 				userDTO.setDefaultColor(user.getDefaultColor());
 				userDTO.setEmail(teacher.getEmail());
 				userDTO.setPhone(teacher.getPhone());
-				if(teacher.getGender() != null) {
+				if (teacher.getGender() != null) {
 					userDTO.setGender(teacher.getGender().toString());
 				}
 				userDTO.setWorkplace(teacher.getWorkplace());
@@ -207,7 +213,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 				userDTO.setDefaultColor(user.getDefaultColor());
 				userDTO.setEmail(student.getEmail());
 				userDTO.setPhone(student.getPhone());
-				if(student.getGender() != null) {
+				if (student.getGender() != null) {
 					userDTO.setGender(student.getGender().toString());
 				}
 				break;
