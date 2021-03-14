@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
-@Document(collection = "class_room")
+@Document(collection = "classroom")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,7 +21,6 @@ public class Classroom extends BaseEntity {
 	private String password;
 	private Boolean isPrivate;
 	private String createdBy;
-	private String responsible;
-	private String link;
+	private String responsible; // userId
 	
 }

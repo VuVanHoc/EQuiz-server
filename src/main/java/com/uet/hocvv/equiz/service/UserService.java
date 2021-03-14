@@ -4,11 +4,12 @@ import com.uet.hocvv.equiz.domain.entity.User;
 import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
 import com.uet.hocvv.equiz.domain.request.ForgotPasswordRequest;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
-import com.uet.hocvv.equiz.domain.response.UserDTO;
 
 import java.util.List;
 
 public interface UserService {
+	
+	User getByUsername(String username) throws Exception;
 	
 	User signUp(SignUpRequest signUpRequest) throws Exception;
 	

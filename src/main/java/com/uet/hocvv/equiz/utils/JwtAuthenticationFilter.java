@@ -1,5 +1,6 @@
 package com.uet.hocvv.equiz.utils;
 
+import com.uet.hocvv.equiz.domain.entity.User;
 import com.uet.hocvv.equiz.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,5 +56,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			return bearerToken.substring(7);
 		}
 		return null;
+	}
+	
+	public User getUserFromRequest(HttpServletRequest httpServletRequest) throws Exception {
+		String jwt = getJwtFromRequest(httpServletRequest);
+		User user;
+		if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+			String username = tokenProvider.getUsernameFromJwt(jwt);
+			user = userService.getByUsername(username);
+			return user;
+		}
+		return null;
+		
 	}
 }

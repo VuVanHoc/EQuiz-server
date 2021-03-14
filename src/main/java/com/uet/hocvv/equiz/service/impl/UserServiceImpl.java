@@ -63,7 +63,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 	
 	@Override
-	public User signUp(SignUpRequest signUpRequest) throws Exception {
+	public User getByUsername(String username) throws Exception {
+		return userRepository.findByUsername(username);
+	}
+	
+	@Override
+	public User signUp(SignUpRequest signUpRequest) throws Exception{
 		if (StringUtils.isEmpty(signUpRequest.getUsername())) {
 			throw new Exception(CommonMessage.USERNAME_IS_REQUIRED.toString());
 		}
@@ -190,6 +195,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		UserDTO userDTO = new UserDTO();
 		userDTO.setFullName(user.getFullName());
 		userDTO.setUserType(user.getUserType().toString());
+		userDTO.setUserId(user.getId());
 		switch (user.getUserType()) {
 			case TEACHER:
 				Teacher teacher = teacherRepository.findByUserId(user.getId());
@@ -204,6 +210,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 				}
 				userDTO.setWorkplace(teacher.getWorkplace());
 				userDTO.setPrefixJob(teacher.getPrefixJob());
+				userDTO.setTeacherId(teacher.getId());
 				break;
 			case STUDENT:
 				Student student = studentRepository.findByUserId(user.getId());
@@ -216,6 +223,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 				if (student.getGender() != null) {
 					userDTO.setGender(student.getGender().toString());
 				}
+				userDTO.setStudentId(student.getId());
 				break;
 		}
 		return userDTO;

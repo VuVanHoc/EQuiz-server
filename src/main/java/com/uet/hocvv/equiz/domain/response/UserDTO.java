@@ -7,6 +7,9 @@ import java.util.Date;
 @Data
 public class UserDTO {
 	
+	private String userId;
+	private String teacherId;
+	private String studentId;
 	private String fullName;
 	private String userType;
 	private String defaultColor;
