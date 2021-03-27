@@ -9,5 +9,6 @@ public enum CommonMessage {
 	FAIL,
 	NOT_FOUND,
 	EXISTED,
-	
+	WRONG_PASSWORD_TO_JOIN,
+	ALREADY_JOINED_THIS_CLASSROOM
 }

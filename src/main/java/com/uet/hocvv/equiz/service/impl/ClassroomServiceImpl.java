@@ -2,6 +2,7 @@ package com.uet.hocvv.equiz.service.impl;
 
 import com.uet.hocvv.equiz.common.CommonMessage;
 import com.uet.hocvv.equiz.domain.entity.Classroom;
+import com.uet.hocvv.equiz.domain.entity.ClassroomStudent;
 import com.uet.hocvv.equiz.domain.entity.Teacher;
 import com.uet.hocvv.equiz.domain.entity.User;
 import com.uet.hocvv.equiz.domain.request.CreateClassroomRequest;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ClassroomServiceImpl implements ClassroomService {
@@ -105,7 +107,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 		ClassroomDTO classroomDTO = modelMapper.map(classroom, ClassroomDTO.class);
 		if (teacher != null) {
 			classroomDTO.setResponsibleEmail(teacher.getEmail());
-			classroomDTO.setResponsibleId(teacher.getId());
+			classroomDTO.setResponsibleId(currentUser.getId());
 			classroomDTO.setResponsibleName(currentUser.getFullName());
 			classroomDTO.setResponsibleAvatar(currentUser.getAvatar());
 			classroomDTO.setResponsiblePhone(teacher.getPhone());
@@ -147,6 +149,54 @@ public class ClassroomServiceImpl implements ClassroomService {
 	
 	@Override
 	public String studentJoinToClassroom(Join2ClassroomRequest join2ClassroomRequest) throws Exception {
-		return null;
+		
+		Classroom classroom = classroomRepository.findByCodeAndDeletedIsFalse(join2ClassroomRequest.getClassCode());
+		if(classroom == null) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		if(classroom.getPassword() != null &&  !classroom.getPassword().equals(join2ClassroomRequest.getPassword())) {
+			throw new Exception(CommonMessage.WRONG_PASSWORD_TO_JOIN.name());
+		}
+		ClassroomStudent classroomStudent = classroomStudentRepository.
+				findByUserIdAndStudentIdAndClassroomIdAndDeletedIsFalse(join2ClassroomRequest.getUserId(), join2ClassroomRequest.getStudentId(), classroom.getId());
+		if(classroomStudent != null) {
+			throw new Exception(CommonMessage.ALREADY_JOINED_THIS_CLASSROOM.name());
+		}
+		classroomStudent = new ClassroomStudent();
+		classroomStudent.setClassroomId(classroom.getId());
+		classroomStudent.setStudentId(join2ClassroomRequest.getStudentId());
+		classroomStudent.setUserId(join2ClassroomRequest.getUserId());
+		classroomStudentRepository.save(classroomStudent);
+		return CommonMessage.SUCCESS.name();
+	}
+	
+	@Override
+	public ResponseListDTO getListClassroomForStudent(int pageIndex, int pageSize, SearchDTO searchDTO) throws Exception {
+		
+		List<ClassroomStudent> classroomStudentList = classroomStudentRepository.findAllByDeletedIsFalseAndUserId(searchDTO.getUserId());
+		List<String> classroomIds = classroomStudentList.stream().map(ClassroomStudent::getClassroomId).collect(Collectors.toList());
+		Iterable<Classroom> classrooms = classroomRepository.findAllById(classroomIds);
+		List<ClassroomDTO> classroomDTOS = new ArrayList<>();
+		classrooms.forEach(classroom -> {
+			ClassroomDTO classroomDTO = populateInfoForClassroom(classroom);
+			classroomDTOS.add(classroomDTO);
+		});
+		
+		int total = classroomStudentRepository.countClassroomStudentByUserIdAndDeletedIsFalse(searchDTO.getUserId());
+		return new ResponseListDTO(classroomDTOS, total);
+	}
+	
+	public ClassroomDTO populateInfoForClassroom(Classroom classroom) {
+	 
+		ClassroomDTO classroomDTO = modelMapper.map(classroom, ClassroomDTO.class);
+		
+		Teacher teacher = teacherRepository.findByUserId(classroom.getResponsible());
+		User user = userRepository.findById(teacher.getUserId()).orElse(new User());
+		classroomDTO.setResponsibleAvatar(user.getAvatar());
+		classroomDTO.setResponsibleName(user.getFullName());
+		classroomDTO.setResponsibleEmail(teacher.getEmail());
+		classroomDTO.setResponsiblePhone(teacher.getPhone());
+		classroomDTO.setResponsibleId(user.getId());
+		return classroomDTO;
 	}
 }

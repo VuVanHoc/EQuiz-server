@@ -23,6 +23,8 @@ public interface ClassroomService {
 	
 	String studentJoinToClassroom(Join2ClassroomRequest join2ClassroomRequest) throws Exception;
 	
+	ResponseListDTO getListClassroomForStudent(int pageIndex, int pageSize, SearchDTO searchDTO) throws Exception;
+	
 	
 	
 }

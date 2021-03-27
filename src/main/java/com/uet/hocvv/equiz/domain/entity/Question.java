@@ -1,5 +1,6 @@
 package com.uet.hocvv.equiz.domain.entity;
 
+import com.uet.hocvv.equiz.domain.enu.LevelType;
 import com.uet.hocvv.equiz.domain.enu.QuestionType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,7 +14,9 @@ import java.util.List;
 public class Question  extends BaseEntity{
 	
 	private String content;
-	private QuestionType type;
-	private String createdBy;
+	private QuestionType questionType;
+	private String createdBy; //userId
+	private String hint;
+	private LevelType level;
 	
 }

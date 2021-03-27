@@ -13,4 +13,6 @@ public interface ClassroomRepository extends PagingAndSortingRepository<Classroo
 	List<Classroom> findByResponsibleAndDeleted(String responsible, boolean deleted, Pageable pageable);
 	
 	int countByResponsibleAndDeleted(String responsible, boolean deleted);
+	
+	Classroom findByCodeAndDeletedIsFalse(String code);
 }

@@ -2,12 +2,14 @@ package com.uet.hocvv.equiz.controller;
 
 import com.uet.hocvv.equiz.domain.RestBody;
 import com.uet.hocvv.equiz.domain.request.CreateClassroomRequest;
+import com.uet.hocvv.equiz.domain.request.Join2ClassroomRequest;
 import com.uet.hocvv.equiz.domain.request.SearchDTO;
 import com.uet.hocvv.equiz.domain.response.ClassroomDTO;
 import com.uet.hocvv.equiz.domain.response.ResponseListDTO;
 import com.uet.hocvv.equiz.service.ClassroomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +23,7 @@ public class ClassroomController {
 	@Autowired
 	ClassroomService classroomService;
 	
-	@PostMapping(value = "getList", consumes = "application/json")
+	@PostMapping(value = "getList", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ResponseEntity<?> getList(@RequestParam(value = "pageIndex", defaultValue = "0") int pageIndex,
@@ -32,7 +34,7 @@ public class ClassroomController {
 		return ResponseEntity.ok(restBody);
 	}
 	
-	@PostMapping(value = "create", consumes = "application/json")
+	@PostMapping(value = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ResponseEntity<?> create(@RequestBody CreateClassroomRequest createClassroomRequest, HttpServletRequest httpServletRequest) throws Exception {
@@ -41,7 +43,7 @@ public class ClassroomController {
 		return ResponseEntity.ok(restBody);
 	}
 	
-	@PutMapping(value = "update", consumes = "application/json")
+	@PutMapping(value = "update", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ResponseEntity<?> update(@RequestBody CreateClassroomRequest createClassroomRequest, HttpServletRequest httpServletRequest) throws Exception {
@@ -54,7 +56,6 @@ public class ClassroomController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ResponseEntity<?> delete(@PathVariable("id") String id) throws Exception {
-		System.out.println(id);
 		String result = classroomService.delete(id);
 		RestBody restBody = RestBody.success(result);
 		return ResponseEntity.ok(restBody);
@@ -66,6 +67,26 @@ public class ClassroomController {
 	public ResponseEntity<?> getDetail(@PathVariable("id") String id) throws Exception {
 		ClassroomDTO classroomDTO = classroomService.getDetail(id);
 		RestBody restBody = RestBody.success(classroomDTO);
+		return ResponseEntity.ok(restBody);
+	}
+	
+	@PostMapping(value = "getListClassroomForStudent")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ResponseEntity<?> getListClassroomForStudent(@RequestParam(value = "pageIndex", defaultValue = "0") int pageIndex,
+	                                                    @RequestParam(value = "pageSize", defaultValue = "15") int pageSize,
+	                                                    @RequestBody SearchDTO searchDTO) throws Exception {
+		ResponseListDTO responseListDTO = classroomService.getListClassroomForStudent(pageIndex, pageSize, searchDTO);
+		RestBody restBody = RestBody.success(responseListDTO);
+		return ResponseEntity.ok(restBody);
+	}
+	
+	@PostMapping(value = "joinToClassroom")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<?> joinToClassroom(@RequestBody Join2ClassroomRequest join2ClassroomRequest) throws Exception {
+		String s = classroomService.studentJoinToClassroom(join2ClassroomRequest);
+		RestBody restBody = RestBody.success(s);
 		return ResponseEntity.ok(restBody);
 	}
 }
