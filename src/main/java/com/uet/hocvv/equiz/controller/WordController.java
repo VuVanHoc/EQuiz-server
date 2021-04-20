@@ -22,8 +22,8 @@ public class WordController {
 	@GetMapping("randomWords")
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
-	public ResponseEntity<?> getRandomWord(@RequestParam(value = "number") int number) {
-		List<WordDTO> wordDTOS = wordService.getRandomWord(number);
+	public ResponseEntity<?> getRandomWord(@RequestParam(value = "number") int number, @RequestParam(value = "level", defaultValue = "EASY") String level) {
+		List<WordDTO> wordDTOS = wordService.getRandomWord(number, level);
 		RestBody restBody = RestBody.success(wordDTOS);
 		return ResponseEntity.ok(restBody);
 	}

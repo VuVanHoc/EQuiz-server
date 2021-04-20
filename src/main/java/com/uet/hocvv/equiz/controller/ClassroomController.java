@@ -43,7 +43,7 @@ public class ClassroomController {
 		return ResponseEntity.ok(restBody);
 	}
 	
-	@PutMapping(value = "update", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "update", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ResponseEntity<?> update(@RequestBody CreateClassroomRequest createClassroomRequest, HttpServletRequest httpServletRequest) throws Exception {

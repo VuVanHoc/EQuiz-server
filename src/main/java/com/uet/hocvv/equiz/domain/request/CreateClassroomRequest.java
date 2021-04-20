@@ -12,5 +12,6 @@ public class CreateClassroomRequest {
 	private String description;
 //	Id of user create classroom
 	private String responsibleId;
+	private String code;
 	
 }

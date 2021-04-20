@@ -49,7 +49,7 @@ public class WordServiceImpl implements WordService {
 	}
 	
 	@Override
-	public List<WordDTO> getRandomWord(int number) {
+	public List<WordDTO> getRandomWord(int number, String level) {
 		SampleOperation sampleOperation = Aggregation.sample(number);
 		Aggregation aggregation = Aggregation.newAggregation(sampleOperation);
 		AggregationResults<Word> aggregationResults = mongoTemplate.aggregate(aggregation, "words", Word.class);

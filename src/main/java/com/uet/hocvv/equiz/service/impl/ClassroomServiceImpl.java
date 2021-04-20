@@ -137,10 +137,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 		}
 		Classroom classroom = classroomOptional.get();
 		
-		ClassroomDTO classroomDTO = modelMapper.map(classroom, ClassroomDTO.class);
-		classroomDTO.setCreatedDate(classroom.getCreatedDate().getTime());
-		int totalStudent = classroomStudentRepository.countClassroomStudentByClassroomId(id);
-		classroomDTO.setTotalStudent(totalStudent);
+		ClassroomDTO classroomDTO = populateInfoForClassroom(classroom);
 //		TODO: get responsible info here
 		
 		

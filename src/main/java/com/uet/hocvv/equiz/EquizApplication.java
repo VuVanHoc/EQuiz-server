@@ -40,6 +40,6 @@ public class EquizApplication implements CommandLineRunner {
 	
 	@Override
 	public void run(String... args) throws Exception {
-		wordService.initDataFromFile();
+//		wordService.initDataFromFile();
 	}
 }

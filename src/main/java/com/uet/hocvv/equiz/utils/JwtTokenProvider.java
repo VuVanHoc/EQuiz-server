@@ -13,6 +13,8 @@ import java.util.Date;
 public class JwtTokenProvider {
 	
 	private final String JWT_SECRET = "equiz@2021@hocvv";
+	
+	
 	private final Long JWT_EXPIRATION = 30 * 24 * 60 * 60 * 1000L;
 	
 	public String generateToken(CustomUserDetails userDetails) {

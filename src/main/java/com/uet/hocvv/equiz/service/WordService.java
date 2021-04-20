@@ -12,7 +12,7 @@ public interface WordService {
 	
 	void initDataFromFile() throws IOException;
 	
-	List<WordDTO> getRandomWord(int number);
+	List<WordDTO> getRandomWord(int number, String level);
 	
 	String saveDataFromWordAPI(SaveDataFromWordAPIRequest saveDataFromWordAPIRequest);
 }
