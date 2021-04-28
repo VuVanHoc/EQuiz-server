@@ -1,8 +1,6 @@
 package com.uet.hocvv.equiz.service;
 
-import com.uet.hocvv.equiz.domain.request.CreateActivityRequest;
-import com.uet.hocvv.equiz.domain.request.SaveResultPracticeRequest;
-import com.uet.hocvv.equiz.domain.request.SearchDTO;
+import com.uet.hocvv.equiz.domain.request.*;
 import com.uet.hocvv.equiz.domain.response.ActivityDTO;
 import com.uet.hocvv.equiz.domain.response.ResponseListDTO;
 import org.springframework.stereotype.Service;
@@ -22,4 +20,9 @@ public interface ActivityService {
 	
 	ActivityDTO getRandomCrosswordByLevelAndSubject(String level, String subject) throws Exception;
 	
+	String shareActivity(ShareActivityRequest shareActivityRequest) throws Exception;
+	
+	String assignForClassroom(AssignActivityRequest assignActivityRequest) throws Exception;
+	
+	ResponseListDTO getActivitiesForClassroom(SearchClassroomActivityRequest searchClassroomActivityRequest, int pageIndex, int pageSize);
 }

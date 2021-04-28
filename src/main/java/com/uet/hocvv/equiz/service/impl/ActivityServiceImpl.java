@@ -1,24 +1,19 @@
 package com.uet.hocvv.equiz.service.impl;
 
 import com.uet.hocvv.equiz.common.CommonMessage;
-import com.uet.hocvv.equiz.domain.entity.Activity;
-import com.uet.hocvv.equiz.domain.entity.StudentActivity;
-import com.uet.hocvv.equiz.domain.entity.Teacher;
-import com.uet.hocvv.equiz.domain.entity.User;
+import com.uet.hocvv.equiz.domain.entity.*;
 import com.uet.hocvv.equiz.domain.enu.ActivityType;
 import com.uet.hocvv.equiz.domain.enu.LevelType;
-import com.uet.hocvv.equiz.domain.request.CreateActivityRequest;
-import com.uet.hocvv.equiz.domain.request.SaveResultPracticeRequest;
-import com.uet.hocvv.equiz.domain.request.SearchDTO;
+import com.uet.hocvv.equiz.domain.enu.UserType;
+import com.uet.hocvv.equiz.domain.request.*;
 import com.uet.hocvv.equiz.domain.response.ActivityDTO;
 import com.uet.hocvv.equiz.domain.response.ResponseListDTO;
-import com.uet.hocvv.equiz.repository.ActivityRepository;
-import com.uet.hocvv.equiz.repository.StudentActivityRepository;
-import com.uet.hocvv.equiz.repository.TeacherRepository;
-import com.uet.hocvv.equiz.repository.UserRepository;
+import com.uet.hocvv.equiz.repository.*;
 import com.uet.hocvv.equiz.service.ActivityService;
+import com.uet.hocvv.equiz.utils.Constants;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,12 +22,10 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.SampleOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 public class ActivityServiceImpl implements ActivityService {
@@ -48,6 +41,12 @@ public class ActivityServiceImpl implements ActivityService {
 	TeacherRepository teacherRepository;
 	@Autowired
 	MongoTemplate mongoTemplate;
+	@Autowired
+	PasswordEncoder passwordEncoder;
+	@Value("${default.md5.hash.password}")
+	private String defaultMd5HashPassword;
+	@Autowired
+	ClassroomActivityRepository classroomActivityRepository;
 	
 	@Override
 	public ResponseListDTO getListActivityForTeacher(int pageIndex, int pageSize, SearchDTO searchDTO) throws Exception {
@@ -158,7 +157,6 @@ public class ActivityServiceImpl implements ActivityService {
 		Pageable pageable = PageRequest.of(pageIndex, pageSize, sort);
 		List<StudentActivity> studentActivityList = studentActivityRepository.findByStudentId(searchDTO.getUserId(), pageable);
 		int totalResult = studentActivityRepository.countByStudentId(searchDTO.getUserId());
-		List<String> ids = studentActivityList.stream().map(StudentActivity::getActivityId).collect(Collectors.toList());
 		List<ActivityDTO> activityDTOS = new ArrayList<>();
 		studentActivityList.forEach(studentActivity -> {
 			Activity activity = activityRepository.findById(studentActivity.getActivityId()).orElse(new Activity());
@@ -180,7 +178,7 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Override
 	public ActivityDTO getRandomCrosswordByLevelAndSubject(String level, String subject) throws Exception {
-		SampleOperation sampleOperation = Aggregation.sample(1);
+		SampleOperation sampleOperation = Aggregation.sample(3);
 		Aggregation aggregation;
 		
 		if ("ALL".equals(subject)) {
@@ -203,5 +201,97 @@ public class ActivityServiceImpl implements ActivityService {
 		return modelMapper.map(activityList.get(0), ActivityDTO.class);
 	}
 	
+	@Override
+	public String shareActivity(ShareActivityRequest shareActivityRequest) throws Exception {
+		Activity activity;
+		Optional<Activity> activityOptional = activityRepository.findById(shareActivityRequest.getActivityId());
+		if (!activityOptional.isPresent()) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		activity = activityOptional.get();
+		if ("PUBLIC".equals(shareActivityRequest.getType())) {
+			activity.setSharePublic(true);
+			activity.setUpdatedDate(new Date());
+			activityRepository.save(activity);
+		} else {
+			shareActivityForPerson(activity, shareActivityRequest.getEmail());
+		}
+		return CommonMessage.SUCCESS.name();
+	}
+	
+	@Override
+	public String assignForClassroom(AssignActivityRequest assignActivityRequest) {
+		List<ClassroomActivity> classroomActivities = new ArrayList<>();
+		if (assignActivityRequest.getClassroomIds() == null) {
+			return CommonMessage.SUCCESS.name();
+		}
+		for (String classroomId : assignActivityRequest.getClassroomIds()) {
+			ClassroomActivity classroomActivity = new ClassroomActivity();
+			classroomActivity.setClassroomId(classroomId);
+			classroomActivity.setActivityId(assignActivityRequest.getActivityId());
+			classroomActivity.setEndTime(assignActivityRequest.getEndTime());
+			classroomActivities.add(classroomActivity);
+		}
+		classroomActivityRepository.saveAll(classroomActivities);
+//		TODO: put notification for student in each classroom here
+		return CommonMessage.SUCCESS.name();
+	}
+	
+	@Override
+	public ResponseListDTO getActivitiesForClassroom(SearchClassroomActivityRequest searchClassroomActivityRequest,
+	                                                 int pageIndex, int pageSize) {
+		Sort sort = Sort.by("endTime").descending();
+		Pageable pageable = PageRequest.of(pageIndex, pageSize, sort);
+		List<ActivityDTO> activityDTOS = new ArrayList<>();
+		List<ClassroomActivity> classroomActivities = classroomActivityRepository.
+				findByClassroomIdAndDeletedIsFalse(searchClassroomActivityRequest.getClassroomId(), pageable);
+		
+		if (classroomActivities == null) {
+			return new ResponseListDTO(activityDTOS, 0);
+		}
+		
+		for (ClassroomActivity classroomActivity : classroomActivities) {
+			Activity activity = activityRepository.findById(classroomActivity.getActivityId()).orElse(new Activity());
+			ActivityDTO activityDTO = modelMapper.map(activity, ActivityDTO.class);
+			activityDTO.setEndTime(classroomActivity.getEndTime());
+			activityDTO.setClassroomActivityId(classroomActivity.getId());
+			activityDTOS.add(activityDTO);
+		}
+		int total = classroomActivityRepository.countByClassroomIdAndDeletedIsFalse(searchClassroomActivityRequest.getClassroomId());
+		return new ResponseListDTO(activityDTOS, total);
+	}
+	
+	
+	private void shareActivityForPerson(Activity activity, String email) {
+		User user = userRepository.findByUsername(email);
+		if (user == null) {
+			user = new User();
+			user.setUserType(UserType.TEACHER);
+			user.setPassword(passwordEncoder.encode(defaultMd5HashPassword));
+			user.setDefaultColor(generateRandomColor());
+			user.setFullName(email);
+			user.setUsername(email);
+			userRepository.save(user);
+			
+			Teacher teacher = new Teacher();
+			teacher.setUserId(user.getId());
+			teacherRepository.save(teacher);
+		}
+		if (user.getUserType().equals(UserType.STUDENT)) {
+			return;
+		}
+		Activity newActivity = modelMapper.map(activity, Activity.class);
+		newActivity.setId(null);
+		newActivity.setOwnerId(user.getId());
+//		TODO: createdBy should be id of user who shared this activity
+		newActivity.setCreatedBy(user.getId());
+		
+		activityRepository.save(newActivity);
+	}
+	
+	private String generateRandomColor() {
+		int random = new Random().nextInt(Constants.COLOR_TYPE.length);
+		return Constants.COLOR_TYPE[random];
+	}
 	
 }

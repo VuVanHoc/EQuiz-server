@@ -1,9 +1,7 @@
 package com.uet.hocvv.equiz.controller;
 
 import com.uet.hocvv.equiz.domain.RestBody;
-import com.uet.hocvv.equiz.domain.request.CreateActivityRequest;
-import com.uet.hocvv.equiz.domain.request.SaveResultPracticeRequest;
-import com.uet.hocvv.equiz.domain.request.SearchDTO;
+import com.uet.hocvv.equiz.domain.request.*;
 import com.uet.hocvv.equiz.domain.response.ActivityDTO;
 import com.uet.hocvv.equiz.domain.response.ResponseListDTO;
 import com.uet.hocvv.equiz.service.ActivityService;
@@ -87,4 +85,32 @@ public class ActivityController {
 		return ResponseEntity.ok(restBody);
 	}
 	
+	@PostMapping("share")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<Object> shareActivity(@RequestBody ShareActivityRequest shareActivityRequest) throws Exception {
+		String result = activityService.shareActivity(shareActivityRequest);
+		RestBody restBody = RestBody.success(result);
+		return ResponseEntity.ok(restBody);
+	}
+	
+	@PostMapping("assignForClassroom")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<Object> assignForClassroom(@RequestBody AssignActivityRequest assignActivityRequest) throws Exception {
+		String result = activityService.assignForClassroom(assignActivityRequest);
+		RestBody restBody = RestBody.success(result);
+		return ResponseEntity.ok(restBody);
+	}
+	
+	@PostMapping("getActivitiesForClassroom")
+	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<Object> getActivitiesForClassroom(@RequestBody SearchClassroomActivityRequest searchClassroomActivityRequest,
+	                                                        @RequestParam(name = "pageIndex") int pageIndex,
+	                                                        @RequestParam(name = "pageSize") int pageSize) throws Exception {
+		ResponseListDTO responseListDTO = activityService.getActivitiesForClassroom(searchClassroomActivityRequest, pageIndex, pageSize);
+		RestBody restBody = RestBody.success(responseListDTO);
+		return ResponseEntity.ok(restBody);
+	}
 }

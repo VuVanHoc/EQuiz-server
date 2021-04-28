@@ -21,7 +21,7 @@ public class Activity extends BaseEntity {
 	private String url;
 	private List<String> tags;
 	private String dataSetup;
-	private String subject; //chủ đề của trò chơi.
+	private String subject; //chủ đề của trò chơi. (môn học)
 	private LevelType level;
 	private boolean sharePublic = false;
 }

@@ -32,4 +32,5 @@ public class ActivityDTO {
 	private String responsiblePhone;
 	private String responsibleAvatar;
 	
+	private String classroomActivityId;
 }
