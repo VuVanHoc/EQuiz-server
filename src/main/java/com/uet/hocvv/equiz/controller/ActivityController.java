@@ -113,4 +113,13 @@ public class ActivityController {
 		RestBody restBody = RestBody.success(responseListDTO);
 		return ResponseEntity.ok(restBody);
 	}
+	
+	@GetMapping("detail/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ResponseEntity<Object> getDetail(@PathVariable("id") String id) throws Exception {
+		ActivityDTO activityDTO = activityService.getDetail(id);
+		RestBody restBody = RestBody.success(activityDTO);
+		return ResponseEntity.ok(restBody);
+	}
 }

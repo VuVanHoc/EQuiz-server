@@ -10,9 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("api/word")
 public class WordController {
 	
@@ -34,5 +35,11 @@ public class WordController {
 	public ResponseEntity<?> saveDataFromWordAPI(@RequestBody SaveDataFromWordAPIRequest saveDataFromWordAPIRequest) {
 		String s = wordService.saveDataFromWordAPI(saveDataFromWordAPIRequest);
 		return ResponseEntity.ok(s);
+	}
+	
+	@GetMapping("initDataDictionary")
+	public String initData() throws IOException {
+		wordService.initDataFromFile();
+		return "SUCCESS";
 	}
 }

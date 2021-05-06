@@ -24,5 +24,8 @@ public interface ActivityService {
 	
 	String assignForClassroom(AssignActivityRequest assignActivityRequest) throws Exception;
 	
-	ResponseListDTO getActivitiesForClassroom(SearchClassroomActivityRequest searchClassroomActivityRequest, int pageIndex, int pageSize);
+	ResponseListDTO getActivitiesForClassroom(SearchClassroomActivityRequest searchClassroomActivityRequest,
+	                                          int pageIndex, int pageSize);
+	
+	ActivityDTO getDetail(String id) throws Exception;
 }

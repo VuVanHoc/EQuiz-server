@@ -261,6 +261,18 @@ public class ActivityServiceImpl implements ActivityService {
 		return new ResponseListDTO(activityDTOS, total);
 	}
 	
+	@Override
+	public ActivityDTO getDetail(String id) throws Exception {
+		Optional<Activity> activityOptional = activityRepository.findById(id);
+		if(!activityOptional.isPresent()) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		Activity activity = activityOptional.get();
+		ActivityDTO activityDTO = modelMapper.map(activity, ActivityDTO.class);
+		activityDTO.setType(activity.getType().name());
+		return activityDTO;
+	}
+	
 	
 	private void shareActivityForPerson(Activity activity, String email) {
 		User user = userRepository.findByUsername(email);

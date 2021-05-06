@@ -21,6 +21,7 @@ public class UserDTO {
 	private String gender;
 	private String prefixJob;
 	private String workplace;
+	private String username;
 	
 	
 }

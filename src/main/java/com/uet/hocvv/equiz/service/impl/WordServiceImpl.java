@@ -2,6 +2,7 @@ package com.uet.hocvv.equiz.service.impl;
 
 import com.uet.hocvv.equiz.common.CommonMessage;
 import com.uet.hocvv.equiz.domain.entity.Word;
+import com.uet.hocvv.equiz.domain.entity.word.Dictionary;
 import com.uet.hocvv.equiz.domain.request.SaveDataFromWordAPIRequest;
 import com.uet.hocvv.equiz.domain.response.WordDTO;
 import com.uet.hocvv.equiz.repository.WordRepository;
@@ -20,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,18 +36,29 @@ public class WordServiceImpl implements WordService {
 	
 	@Override
 	public void initDataFromFile() throws IOException {
-		long totalWord = wordRepository.count();
-		if (totalWord > 0) {
-			return;
-		}
-		Resource resource = new ClassPathResource("words.txt");
-		InputStream inputStream = resource.getInputStream();
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-		List<Word> list = bufferedReader.lines().filter(s -> !s.contains("'") && !s.contains("&") && !s.contains("/"))
-				.map(Word::new)
-				.collect(Collectors.toList());
+//		long totalWord = wordRepository.count();
+//		if (totalWord > 0) {
+//			return;
+//		}
+//		Resource resource = new ClassPathResource("test.txt");
+//		InputStream inputStream = resource.getInputStream();
+//		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+//		List<Word> list = bufferedReader.lines().filter(s -> !s.contains("'") && !s.contains("&") && !s.contains("/"))
+//				.map(Word::new)
+//				.collect(Collectors.toList());
+//
+//		wordRepository.saveAll(list);
 		
-		wordRepository.saveAll(list);
+//		List<Dictionary> dictionaries = new ArrayList<>();
+//
+//		bufferedReader.lines().forEach(line -> {
+//			if (line != null && line.matches("@(.*?)\\s\\/(.*?)\\/")) {
+//				System.out.println("~line:" + line);
+//
+//				Dictionary dictionary = new Dictionary();
+//				dictionary.setWord(line.trim().substring());
+//			}
+//		});
 	}
 	
 	@Override
@@ -60,10 +73,10 @@ public class WordServiceImpl implements WordService {
 	@Override
 	public String saveDataFromWordAPI(SaveDataFromWordAPIRequest saveDataFromWordAPIRequest) {
 		Word word = wordRepository.findByValue(saveDataFromWordAPIRequest.getWord());
-		if(word == null) {
+		if (word == null) {
 			return CommonMessage.FAIL.name();
 		}
-		if(word.getDataFromWordApi() != null) {
+		if (word.getDataFromWordApi() != null) {
 			return CommonMessage.SUCCESS.name();
 		}
 		word.setDataFromWordApi(saveDataFromWordAPIRequest.getData());
