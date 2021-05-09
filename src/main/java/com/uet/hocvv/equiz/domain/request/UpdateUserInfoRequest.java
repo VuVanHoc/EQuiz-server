@@ -12,4 +12,6 @@ public class UpdateUserInfoRequest {
 	private String gender;
 	private String avatar;
 	private String address;
+	private String email;
+	
 }

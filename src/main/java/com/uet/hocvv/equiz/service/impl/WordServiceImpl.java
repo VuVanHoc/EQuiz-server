@@ -1,29 +1,23 @@
 package com.uet.hocvv.equiz.service.impl;
 
 import com.uet.hocvv.equiz.common.CommonMessage;
-import com.uet.hocvv.equiz.domain.entity.Word;
 import com.uet.hocvv.equiz.domain.entity.word.Dictionary;
+import com.uet.hocvv.equiz.domain.enu.LevelType;
 import com.uet.hocvv.equiz.domain.request.SaveDataFromWordAPIRequest;
-import com.uet.hocvv.equiz.domain.response.WordDTO;
+import com.uet.hocvv.equiz.repository.DictionaryRepository;
 import com.uet.hocvv.equiz.repository.WordRepository;
 import com.uet.hocvv.equiz.service.WordService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.SampleOperation;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class WordServiceImpl implements WordService {
@@ -33,6 +27,8 @@ public class WordServiceImpl implements WordService {
 	ModelMapper modelMapper;
 	@Autowired
 	MongoTemplate mongoTemplate;
+	@Autowired
+	DictionaryRepository dictionaryRepository;
 	
 	@Override
 	public void initDataFromFile() throws IOException {
@@ -48,7 +44,7 @@ public class WordServiceImpl implements WordService {
 //				.collect(Collectors.toList());
 //
 //		wordRepository.saveAll(list);
-		
+
 //		List<Dictionary> dictionaries = new ArrayList<>();
 //
 //		bufferedReader.lines().forEach(line -> {
@@ -62,25 +58,40 @@ public class WordServiceImpl implements WordService {
 	}
 	
 	@Override
-	public List<WordDTO> getRandomWord(int number, String level) {
+	public List<Dictionary> getRandomWord(int number, String level) {
 		SampleOperation sampleOperation = Aggregation.sample(number);
-		Aggregation aggregation = Aggregation.newAggregation(sampleOperation);
-		AggregationResults<Word> aggregationResults = mongoTemplate.aggregate(aggregation, "words", Word.class);
-		List<Word> words = aggregationResults.getMappedResults();
-		return words.stream().map(word -> modelMapper.map(word, WordDTO.class)).collect(Collectors.toList());
+		Aggregation aggregation = Aggregation.newAggregation(Aggregation.match(Criteria.where("level").in(level)), sampleOperation);
+		AggregationResults<Dictionary> aggregationResults = mongoTemplate.aggregate(aggregation, "dictionary", Dictionary.class);
+		return aggregationResults.getMappedResults();
 	}
 	
 	@Override
 	public String saveDataFromWordAPI(SaveDataFromWordAPIRequest saveDataFromWordAPIRequest) {
-		Word word = wordRepository.findByValue(saveDataFromWordAPIRequest.getWord());
-		if (word == null) {
-			return CommonMessage.FAIL.name();
-		}
-		if (word.getDataFromWordApi() != null) {
-			return CommonMessage.SUCCESS.name();
-		}
-		word.setDataFromWordApi(saveDataFromWordAPIRequest.getData());
-		wordRepository.save(word);
+//		Word word = wordRepository.findByValue(saveDataFromWordAPIRequest.getWord());
+//		if (word == null) {
+//			return CommonMessage.FAIL.name();
+//		}
+//		if (word.getDataFromWordApi() != null) {
+//			return CommonMessage.SUCCESS.name();
+//		}
+//		word.setDataFromWordApi(saveDataFromWordAPIRequest.getData());
+//		wordRepository.save(word);
 		return CommonMessage.SUCCESS.name();
+	}
+	
+	@Override
+	public void initData(List<Dictionary> dictionaries) {
+		dictionaries.forEach(dictionary -> {
+			if (dictionary.getWord().length() <= 5) {
+				dictionary.setLevel(LevelType.EASY);
+				
+			} else if (dictionary.getWord().length() > 5 && dictionary.getWord().length() <= 8) {
+				dictionary.setLevel(LevelType.MEDIUM);
+				
+			} else {
+				dictionary.setLevel(LevelType.HARD);
+			}
+		});
+		dictionaryRepository.saveAll(dictionaries);
 	}
 }

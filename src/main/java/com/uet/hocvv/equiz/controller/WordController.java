@@ -1,6 +1,7 @@
 package com.uet.hocvv.equiz.controller;
 
 import com.uet.hocvv.equiz.domain.RestBody;
+import com.uet.hocvv.equiz.domain.entity.word.Dictionary;
 import com.uet.hocvv.equiz.domain.request.SaveDataFromWordAPIRequest;
 import com.uet.hocvv.equiz.domain.response.WordDTO;
 import com.uet.hocvv.equiz.service.WordService;
@@ -24,8 +25,8 @@ public class WordController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ResponseEntity<?> getRandomWord(@RequestParam(value = "number") int number, @RequestParam(value = "level", defaultValue = "EASY") String level) {
-		List<WordDTO> wordDTOS = wordService.getRandomWord(number, level);
-		RestBody restBody = RestBody.success(wordDTOS);
+		List<Dictionary> dictionaries = wordService.getRandomWord(number, level);
+		RestBody restBody = RestBody.success(dictionaries);
 		return ResponseEntity.ok(restBody);
 	}
 	
@@ -37,9 +38,9 @@ public class WordController {
 		return ResponseEntity.ok(s);
 	}
 	
-	@GetMapping("initDataDictionary")
-	public String initData() throws IOException {
-		wordService.initDataFromFile();
+	@PostMapping("initDataDictionary")
+	public String initData(@RequestBody List<Dictionary> dictionaries) throws IOException {
+		wordService.initData(dictionaries);
 		return "SUCCESS";
 	}
 }

@@ -178,20 +178,20 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	@Override
 	public ActivityDTO getRandomCrosswordByLevelAndSubject(String level, String subject) throws Exception {
-		SampleOperation sampleOperation = Aggregation.sample(3);
+		SampleOperation sampleOperation = Aggregation.sample(1);
 		Aggregation aggregation;
 		
 		if ("ALL".equals(subject)) {
-			aggregation = Aggregation.newAggregation(sampleOperation,
+			aggregation = Aggregation.newAggregation(
 					Aggregation.match(Criteria.where("level").is(level)
 							.and("type").is(ActivityType.MATRIX_WORD.name())
-							.and("sharePublic").is(true)));
+							.and("sharePublic").is(true)), sampleOperation);
 		} else {
-			aggregation = Aggregation.newAggregation(sampleOperation,
+			aggregation = Aggregation.newAggregation(
 					Aggregation.match(Criteria.where("level").is(level)
 							.and("subject").is(subject)
 							.and("type").is(ActivityType.MATRIX_WORD.name())
-							.and("sharePublic").is(true)));
+							.and("sharePublic").is(true)), sampleOperation);
 		}
 		AggregationResults<Activity> aggregationResults = mongoTemplate.aggregate(aggregation, "activity", Activity.class);
 		List<Activity> activityList = aggregationResults.getMappedResults();
@@ -264,7 +264,7 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
 	public ActivityDTO getDetail(String id) throws Exception {
 		Optional<Activity> activityOptional = activityRepository.findById(id);
-		if(!activityOptional.isPresent()) {
+		if (!activityOptional.isPresent()) {
 			throw new Exception(CommonMessage.NOT_FOUND.name());
 		}
 		Activity activity = activityOptional.get();
