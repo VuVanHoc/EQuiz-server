@@ -4,11 +4,14 @@ import com.uet.hocvv.equiz.domain.entity.User;
 import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
 import com.uet.hocvv.equiz.domain.request.ForgotPasswordRequest;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
+import com.uet.hocvv.equiz.domain.request.UpdateUserInfoRequest;
 import com.uet.hocvv.equiz.domain.response.UserDTO;
 
 import java.util.List;
 
 public interface UserService {
+	
+	User getByUsername(String username) throws Exception;
 	
 	User signUp(SignUpRequest signUpRequest) throws Exception;
 	
@@ -29,4 +32,8 @@ public interface UserService {
 	String forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws Exception;
 	
 	void verifyForgotPassword(String email, String pass, Long expriedTime) throws Exception;
+	
+	UserDTO updateUserInfo(UpdateUserInfoRequest updateUserInfoRequest) throws Exception;
+	
+	UserDTO getUserInfo(String userId) throws Exception;
 }

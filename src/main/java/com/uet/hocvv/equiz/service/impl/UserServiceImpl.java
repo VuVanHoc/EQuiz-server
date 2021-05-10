@@ -5,10 +5,12 @@ import com.uet.hocvv.equiz.config.security.CustomUserDetails;
 import com.uet.hocvv.equiz.domain.entity.Student;
 import com.uet.hocvv.equiz.domain.entity.Teacher;
 import com.uet.hocvv.equiz.domain.entity.User;
+import com.uet.hocvv.equiz.domain.enu.GenderType;
 import com.uet.hocvv.equiz.domain.enu.UserType;
 import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
 import com.uet.hocvv.equiz.domain.request.ForgotPasswordRequest;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
+import com.uet.hocvv.equiz.domain.request.UpdateUserInfoRequest;
 import com.uet.hocvv.equiz.domain.response.UserDTO;
 import com.uet.hocvv.equiz.repository.StudentRepository;
 import com.uet.hocvv.equiz.repository.TeacherRepository;
@@ -27,6 +29,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -63,6 +66,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	}
 	
 	@Override
+	public User getByUsername(String username) throws Exception {
+		return userRepository.findByUsername(username);
+	}
+	
+	@Override
 	public User signUp(SignUpRequest signUpRequest) throws Exception {
 		if (StringUtils.isEmpty(signUpRequest.getUsername())) {
 			throw new Exception(CommonMessage.USERNAME_IS_REQUIRED.toString());
@@ -76,6 +84,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		user.setUsername(signUpRequest.getUsername());
 		user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 		user.setFullName(signUpRequest.getFullname());
+		user.setDefaultColor(generateRandomColor());
 		if (UserType.STUDENT.toString().equals(signUpRequest.getUserType())) {
 			user.setUserType(UserType.STUDENT);
 			userRepository.save(user);
@@ -94,6 +103,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		params.put("param2", prefixUrl + "/verifyEmail?id=" + user.getId());
 		emailService.sendEmail(signUpRequest.getUsername(), "Xác nhận đăng ký tài khoản", "ConfirmSignUp.html", params);
 		return user;
+	}
+	
+	private String generateRandomColor() {
+		int random = new Random().nextInt(Constants.COLOR_TYPE.length);
+		return Constants.COLOR_TYPE[random];
 	}
 	
 	@Override
@@ -140,7 +154,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	public void changePassword(ChangePasswordRequest changePasswordRequest) throws Exception {
 		Optional<User> user = userRepository.findById(changePasswordRequest.getUserId());
 		if (!user.isPresent()) {
-			throw new Exception(CommonMessage.USER_NOT_FOUND.toString());
+			throw new Exception(CommonMessage.USER_NOT_FOUND.name());
+		}
+		if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), user.get().getPassword())) {
+			throw new Exception(CommonMessage.OLD_PASSWORD_NOT_CORRECT.name());
 		}
 		user.get().setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
 		userRepository.save(user.get());
@@ -176,6 +193,59 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		userRepository.save(user);
 	}
 	
+	@Override
+	public UserDTO updateUserInfo(UpdateUserInfoRequest updateUserInfoRequest) throws Exception {
+		Optional<User> userOptional = userRepository.findById(updateUserInfoRequest.getUserId());
+		if (!userOptional.isPresent()) {
+			throw new Exception(CommonMessage.USER_NOT_FOUND.name());
+		}
+		User user = userOptional.get();
+		user.setFullName(updateUserInfoRequest.getFullName());
+		user.setAvatar(updateUserInfoRequest.getAvatar());
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		if (user.getUserType().equals(UserType.TEACHER)) {
+			Teacher teacher = teacherRepository.findByUserId(user.getId());
+			if (teacher == null) {
+				throw new Exception(CommonMessage.USER_NOT_FOUND.name());
+			}
+			teacher.setAddress(updateUserInfoRequest.getAddress());
+			teacher.setPhone(updateUserInfoRequest.getPhone());
+			teacher.setGender(GenderType.valueOf(updateUserInfoRequest.getGender()));
+			teacher.setEmail(updateUserInfoRequest.getEmail());
+			if (updateUserInfoRequest.getBirthday() != null) {
+				teacher.setBirthDay(simpleDateFormat.parse(updateUserInfoRequest.getBirthday()));
+				
+			}
+			teacherRepository.save(teacher);
+		} else if (user.getUserType().equals(UserType.STUDENT)) {
+			Student student = studentRepository.findByUserId(user.getId());
+			if (student == null) {
+				throw new Exception(CommonMessage.USER_NOT_FOUND.name());
+			}
+			student.setGender(GenderType.valueOf(updateUserInfoRequest.getGender()));
+			student.setAddress(updateUserInfoRequest.getAddress());
+			student.setPhone(updateUserInfoRequest.getPhone());
+			student.setEmail(updateUserInfoRequest.getEmail());
+			if (updateUserInfoRequest.getBirthday() != null) {
+				student.setBirthday(simpleDateFormat.parse(updateUserInfoRequest.getBirthday()));
+			}
+			studentRepository.save(student);
+		}
+		userRepository.save(user);
+		
+		return modelMapper.map(user, UserDTO.class);
+	}
+	
+	@Override
+	public UserDTO getUserInfo(String userId) throws Exception {
+		Optional<User> userOptional = userRepository.findById(userId);
+		if (!userOptional.isPresent()) {
+			throw new Exception(CommonMessage.USER_NOT_FOUND.name());
+		}
+		User user = userOptional.get();
+		return populateUserInfo(user.getUsername());
+	}
+	
 	public UserDTO populateUserInfo(String username) throws Exception {
 		User user = userRepository.findByUsername(username);
 		if (user == null) {
@@ -184,6 +254,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		UserDTO userDTO = new UserDTO();
 		userDTO.setFullName(user.getFullName());
 		userDTO.setUserType(user.getUserType().toString());
+		userDTO.setUserId(user.getId());
+		userDTO.setUsername(user.getUsername());
+		userDTO.setEmail(user.getUsername());
 		switch (user.getUserType()) {
 			case TEACHER:
 				Teacher teacher = teacherRepository.findByUserId(user.getId());
@@ -191,13 +264,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 				userDTO.setAvatar(user.getAvatar());
 				userDTO.setBirthday(teacher.getBirthDay());
 				userDTO.setDefaultColor(user.getDefaultColor());
-				userDTO.setEmail(teacher.getEmail());
+//				userDTO.setEmail(teacher.getEmail());
 				userDTO.setPhone(teacher.getPhone());
-				if(teacher.getGender() != null) {
+				if (teacher.getGender() != null) {
 					userDTO.setGender(teacher.getGender().toString());
 				}
 				userDTO.setWorkplace(teacher.getWorkplace());
 				userDTO.setPrefixJob(teacher.getPrefixJob());
+				userDTO.setTeacherId(teacher.getId());
 				break;
 			case STUDENT:
 				Student student = studentRepository.findByUserId(user.getId());
@@ -205,11 +279,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 				userDTO.setAvatar(user.getAvatar());
 				userDTO.setBirthday(student.getBirthday());
 				userDTO.setDefaultColor(user.getDefaultColor());
-				userDTO.setEmail(student.getEmail());
+//				userDTO.setEmail(student.getEmail());
 				userDTO.setPhone(student.getPhone());
-				if(student.getGender() != null) {
+				if (student.getGender() != null) {
 					userDTO.setGender(student.getGender().toString());
 				}
+				userDTO.setStudentId(student.getId());
 				break;
 		}
 		return userDTO;

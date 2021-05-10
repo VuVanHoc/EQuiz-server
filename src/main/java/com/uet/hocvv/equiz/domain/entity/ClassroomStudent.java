@@ -11,4 +11,5 @@ public class ClassroomStudent extends BaseEntity {
 	
 	private String classroomId;
 	private String studentId;
+	private String userId;
 }

@@ -1,6 +1,7 @@
 package com.uet.hocvv.equiz.utils;
 
 import com.uet.hocvv.equiz.config.security.CustomUserDetails;
+import com.uet.hocvv.equiz.domain.entity.User;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,9 @@ import java.util.Date;
 public class JwtTokenProvider {
 	
 	private final String JWT_SECRET = "equiz@2021@hocvv";
-	private final Long JWT_EXPIRATION = 30 * 24 * 60 * 60L;
+	
+	
+	private final Long JWT_EXPIRATION = 30 * 24 * 60 * 60 * 1000L;
 	
 	public String generateToken(CustomUserDetails userDetails) {
 		Date now = new Date();
