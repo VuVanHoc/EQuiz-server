@@ -273,6 +273,29 @@ public class ActivityServiceImpl implements ActivityService {
 		return activityDTO;
 	}
 	
+	@Override
+	public String updateDeadlineActivity(String id, Long endTime) throws Exception {
+		Optional<ClassroomActivity> classroomActivityOptional = classroomActivityRepository.findById(id);
+		if (!classroomActivityOptional.isPresent()) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		ClassroomActivity classroomActivity = classroomActivityOptional.get();
+		classroomActivity.setEndTime(endTime);
+		classroomActivity.setUpdatedDate(new Date());
+		classroomActivityRepository.save(classroomActivity);
+		return CommonMessage.SUCCESS.name();
+	}
+	
+	@Override
+	public String deleteClassroomActivity(String id) throws Exception {
+		Optional<ClassroomActivity> classroomActivityOptional = classroomActivityRepository.findById(id);
+		if (!classroomActivityOptional.isPresent()) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		classroomActivityRepository.delete(classroomActivityOptional.get());
+		return CommonMessage.SUCCESS.name();
+	}
+	
 	
 	private void shareActivityForPerson(Activity activity, String email) {
 		User user = userRepository.findByUsername(email);

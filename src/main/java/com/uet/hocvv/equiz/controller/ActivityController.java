@@ -122,4 +122,21 @@ public class ActivityController {
 		RestBody restBody = RestBody.success(activityDTO);
 		return ResponseEntity.ok(restBody);
 	}
+	
+	@PostMapping("updateDeadlineActivity")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ResponseEntity<Object> updateDeadlineActivity(@RequestParam("id") String id, @RequestParam("endTime") Long endTime) throws Exception {
+		String result =  activityService.updateDeadlineActivity(id, endTime);
+		RestBody restBody = RestBody.success(result);
+		return ResponseEntity.ok(restBody);
+	}
+	
+	@DeleteMapping("deleteClassroomActivity")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<Object> deleteClassroomActivity(@RequestParam("id") String id) throws Exception {
+		String result = activityService.deleteClassroomActivity(id);
+		RestBody restBody = RestBody.success(result);
+		return ResponseEntity.ok(restBody);
+	}
 }
