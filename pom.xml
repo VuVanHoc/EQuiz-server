@@ -31,7 +31,7 @@
             <id>production</id>
             <properties>
                 <active.mode>production</active.mode>
-                <data.mongodb.uri>mongodb+srv://equiz2021:MlqrzE1lIBgTTjUi@cluster0.zjcyr.mongodb.net/equiz?retryWrites=true&amp;w=majority</data.mongodb.uri>
+                <data.mongodb.uri>mongodb://vuvanhoc:n40AtfbnOxMXKrpk@cluster0-shard-00-00.zjcyr.mongodb.net:27017,cluster0-shard-00-01.zjcyr.mongodb.net:27017,cluster0-shard-00-02.zjcyr.mongodb.net:27017/myFirstDatabase?ssl=true&amp;replicaSet=atlas-dltone-shard-0&amp;authSource=admin&amp;retryWrites=true&amp;w=majority</data.mongodb.uri>
                 <data.mongodb.password>MlqrzE1lIBgTTjUi</data.mongodb.password>
                 <data.mongodb.username>equiz2021</data.mongodb.username>
                 <prefix.url>http://54.251.91.8:8890</prefix.url>
