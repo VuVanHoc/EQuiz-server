@@ -19,4 +19,6 @@ public class SaveResultPracticeRequest {
 	private String dataSetup;
 	private String activityType;
 	private String level;
+	private String classroomId;
+	
 }

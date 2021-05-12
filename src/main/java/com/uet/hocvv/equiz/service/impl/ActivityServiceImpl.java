@@ -143,6 +143,7 @@ public class ActivityServiceImpl implements ActivityService {
 		studentActivity.setScore(saveResultPracticeRequest.getTotalQuestion() == 0 ? 0 : saveResultPracticeRequest.getTotalAnswerCorrect() * 1.0 / saveResultPracticeRequest.getTotalQuestion());
 		studentActivity.setTotalAnswerCorrect(saveResultPracticeRequest.getTotalAnswerCorrect());
 		studentActivity.setTotalQuestion(saveResultPracticeRequest.getTotalQuestion());
+		studentActivity.setClassroomId(saveResultPracticeRequest.getClassroomId());
 		studentActivityRepository.save(studentActivity);
 		return CommonMessage.SUCCESS.name();
 	}
@@ -294,6 +295,21 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		classroomActivityRepository.delete(classroomActivityOptional.get());
 		return CommonMessage.SUCCESS.name();
+	}
+	
+	@Override
+	public ActivityDTO getDataFromClassroomActivity(String classroomActivityId) throws Exception {
+		Optional<ClassroomActivity> classroomActivityOptional = classroomActivityRepository.findById(classroomActivityId);
+		if(!classroomActivityOptional.isPresent()) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		
+		Optional<Activity> activityOptional = activityRepository.findById(classroomActivityOptional.get().getActivityId());
+		if(!activityOptional.isPresent()) {
+			throw new Exception(CommonMessage.ACTIVITY_HAS_BEEN_DELETED.name());
+		}
+		
+		return modelMapper.map(activityOptional.get(), ActivityDTO.class);
 	}
 	
 	

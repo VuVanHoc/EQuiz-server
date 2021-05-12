@@ -139,4 +139,12 @@ public class ActivityController {
 		RestBody restBody = RestBody.success(result);
 		return ResponseEntity.ok(restBody);
 	}
+	
+	@GetMapping("getDataFromClassroomActivity")
+	@ResponseStatus(HttpStatus.OK)
+	public ResponseEntity<Object> getDataFromClassroomActivity(@RequestParam("classroomActivityId") String classroomActivityId) throws Exception {
+		ActivityDTO activityDTO= activityService.getDataFromClassroomActivity(classroomActivityId);
+		RestBody restBody = RestBody.success(activityDTO);
+		return ResponseEntity.ok(restBody);
+	}
 }

@@ -32,4 +32,7 @@ public interface ActivityService {
 	String updateDeadlineActivity(String id, Long endTime) throws Exception;
 	
 	String deleteClassroomActivity(String id) throws Exception;
+	
+	ActivityDTO getDataFromClassroomActivity(String classroomActivityId) throws Exception;
+	
 }
