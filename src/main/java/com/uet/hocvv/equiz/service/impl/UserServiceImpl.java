@@ -85,6 +85,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
 		user.setFullName(signUpRequest.getFullname());
 		user.setDefaultColor(generateRandomColor());
+		user.setActive(true);
 		if (UserType.STUDENT.toString().equals(signUpRequest.getUserType())) {
 			user.setUserType(UserType.STUDENT);
 			userRepository.save(user);
@@ -98,10 +99,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			teacher.setUserId(user.getId());
 			teacherRepository.save(teacher);
 		}
-		Map<String, Object> params = new HashMap<>();
-		params.put("param1", signUpRequest.getFullname());
-		params.put("param2", prefixUrl + "/verifyEmail?id=" + user.getId());
-		emailService.sendEmail(signUpRequest.getUsername(), "Xác nhận đăng ký tài khoản", "ConfirmSignUp.html", params);
+//		Map<String, Object> params = new HashMap<>();
+//		params.put("param1", signUpRequest.getFullname());
+//		params.put("param2", prefixUrl + "/verifyEmail?id=" + user.getId());
+//		emailService.sendEmail(signUpRequest.getUsername(), "Xác nhận đăng ký tài khoản", "ConfirmSignUp.html", params);
 		return user;
 	}
 	
