@@ -28,4 +28,11 @@ public interface ActivityService {
 	                                          int pageIndex, int pageSize);
 	
 	ActivityDTO getDetail(String id) throws Exception;
+	
+	String updateDeadlineActivity(String id, Long endTime) throws Exception;
+	
+	String deleteClassroomActivity(String id) throws Exception;
+	
+	ActivityDTO getDataFromClassroomActivity(String classroomActivityId) throws Exception;
+	
 }

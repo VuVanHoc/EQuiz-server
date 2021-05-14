@@ -210,7 +210,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			}
 			teacher.setAddress(updateUserInfoRequest.getAddress());
 			teacher.setPhone(updateUserInfoRequest.getPhone());
-			teacher.setGender(GenderType.valueOf(updateUserInfoRequest.getGender()));
+			if(updateUserInfoRequest.getGender() != null) {
+				teacher.setGender(GenderType.valueOf(updateUserInfoRequest.getGender()));
+			}
 			teacher.setEmail(updateUserInfoRequest.getEmail());
 			if (updateUserInfoRequest.getBirthday() != null) {
 				teacher.setBirthDay(simpleDateFormat.parse(updateUserInfoRequest.getBirthday()));
@@ -222,7 +224,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			if (student == null) {
 				throw new Exception(CommonMessage.USER_NOT_FOUND.name());
 			}
-			student.setGender(GenderType.valueOf(updateUserInfoRequest.getGender()));
+			if(updateUserInfoRequest.getGender() != null) {
+				student.setGender(GenderType.valueOf(updateUserInfoRequest.getGender()));
+			}
 			student.setAddress(updateUserInfoRequest.getAddress());
 			student.setPhone(updateUserInfoRequest.getPhone());
 			student.setEmail(updateUserInfoRequest.getEmail());

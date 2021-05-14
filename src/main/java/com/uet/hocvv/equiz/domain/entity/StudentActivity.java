@@ -20,5 +20,6 @@ public class StudentActivity extends BaseEntity {
 	private Double score;
 	private int totalQuestion;
 	private int totalAnswerCorrect;
+	private String classroomId;
 	
 }

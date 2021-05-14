@@ -45,7 +45,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 						"/api/auth/signup/**",
 						"/verifyEmail",
 						"/api/user/forgotPassword",
-						"/verifyForgotPassword/**"
+						"/verifyForgotPassword/**",
+						"/ws/**",
+						"/testSocket"
 				)
 				.permitAll()
 				.antMatchers("/v3/api-docs",

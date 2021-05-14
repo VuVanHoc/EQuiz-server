@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.SampleOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,8 @@ public class ActivityServiceImpl implements ActivityService {
 	private String defaultMd5HashPassword;
 	@Autowired
 	ClassroomActivityRepository classroomActivityRepository;
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
 	
 	@Override
 	public ResponseListDTO getListActivityForTeacher(int pageIndex, int pageSize, SearchDTO searchDTO) throws Exception {
@@ -143,6 +146,7 @@ public class ActivityServiceImpl implements ActivityService {
 		studentActivity.setScore(saveResultPracticeRequest.getTotalQuestion() == 0 ? 0 : saveResultPracticeRequest.getTotalAnswerCorrect() * 1.0 / saveResultPracticeRequest.getTotalQuestion());
 		studentActivity.setTotalAnswerCorrect(saveResultPracticeRequest.getTotalAnswerCorrect());
 		studentActivity.setTotalQuestion(saveResultPracticeRequest.getTotalQuestion());
+		studentActivity.setClassroomId(saveResultPracticeRequest.getClassroomId());
 		studentActivityRepository.save(studentActivity);
 		return CommonMessage.SUCCESS.name();
 	}
@@ -234,6 +238,10 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		classroomActivityRepository.saveAll(classroomActivities);
 //		TODO: put notification for student in each classroom here
+		
+		for (String classroomId : assignActivityRequest.getClassroomIds()) {
+			simpMessagingTemplate.convertAndSend("/notification/classroom/" + classroomId, "Bạn có thông báo mới");
+		}
 		return CommonMessage.SUCCESS.name();
 	}
 	
@@ -271,6 +279,44 @@ public class ActivityServiceImpl implements ActivityService {
 		ActivityDTO activityDTO = modelMapper.map(activity, ActivityDTO.class);
 		activityDTO.setType(activity.getType().name());
 		return activityDTO;
+	}
+	
+	@Override
+	public String updateDeadlineActivity(String id, Long endTime) throws Exception {
+		Optional<ClassroomActivity> classroomActivityOptional = classroomActivityRepository.findById(id);
+		if (!classroomActivityOptional.isPresent()) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		ClassroomActivity classroomActivity = classroomActivityOptional.get();
+		classroomActivity.setEndTime(endTime);
+		classroomActivity.setUpdatedDate(new Date());
+		classroomActivityRepository.save(classroomActivity);
+		return CommonMessage.SUCCESS.name();
+	}
+	
+	@Override
+	public String deleteClassroomActivity(String id) throws Exception {
+		Optional<ClassroomActivity> classroomActivityOptional = classroomActivityRepository.findById(id);
+		if (!classroomActivityOptional.isPresent()) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		classroomActivityRepository.delete(classroomActivityOptional.get());
+		return CommonMessage.SUCCESS.name();
+	}
+	
+	@Override
+	public ActivityDTO getDataFromClassroomActivity(String classroomActivityId) throws Exception {
+		Optional<ClassroomActivity> classroomActivityOptional = classroomActivityRepository.findById(classroomActivityId);
+		if (!classroomActivityOptional.isPresent()) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		
+		Optional<Activity> activityOptional = activityRepository.findById(classroomActivityOptional.get().getActivityId());
+		if (!activityOptional.isPresent()) {
+			throw new Exception(CommonMessage.ACTIVITY_HAS_BEEN_DELETED.name());
+		}
+		
+		return modelMapper.map(activityOptional.get(), ActivityDTO.class);
 	}
 	
 	
