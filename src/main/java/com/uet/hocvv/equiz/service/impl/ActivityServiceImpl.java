@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.SampleOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,8 @@ public class ActivityServiceImpl implements ActivityService {
 	private String defaultMd5HashPassword;
 	@Autowired
 	ClassroomActivityRepository classroomActivityRepository;
+	@Autowired
+	private SimpMessagingTemplate simpMessagingTemplate;
 	
 	@Override
 	public ResponseListDTO getListActivityForTeacher(int pageIndex, int pageSize, SearchDTO searchDTO) throws Exception {
@@ -235,6 +238,10 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 		classroomActivityRepository.saveAll(classroomActivities);
 //		TODO: put notification for student in each classroom here
+		
+		for (String classroomId : assignActivityRequest.getClassroomIds()) {
+			simpMessagingTemplate.convertAndSend("/notification/classroom/" + classroomId, "Bạn có thông báo mới");
+		}
 		return CommonMessage.SUCCESS.name();
 	}
 	
@@ -300,12 +307,12 @@ public class ActivityServiceImpl implements ActivityService {
 	@Override
 	public ActivityDTO getDataFromClassroomActivity(String classroomActivityId) throws Exception {
 		Optional<ClassroomActivity> classroomActivityOptional = classroomActivityRepository.findById(classroomActivityId);
-		if(!classroomActivityOptional.isPresent()) {
+		if (!classroomActivityOptional.isPresent()) {
 			throw new Exception(CommonMessage.NOT_FOUND.name());
 		}
 		
 		Optional<Activity> activityOptional = activityRepository.findById(classroomActivityOptional.get().getActivityId());
-		if(!activityOptional.isPresent()) {
+		if (!activityOptional.isPresent()) {
 			throw new Exception(CommonMessage.ACTIVITY_HAS_BEEN_DELETED.name());
 		}
 		

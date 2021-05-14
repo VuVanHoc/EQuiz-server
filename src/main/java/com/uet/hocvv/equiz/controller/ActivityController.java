@@ -8,6 +8,7 @@ import com.uet.hocvv.equiz.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -127,7 +128,7 @@ public class ActivityController {
 	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public ResponseEntity<Object> updateDeadlineActivity(@RequestParam("id") String id, @RequestParam("endTime") Long endTime) throws Exception {
-		String result =  activityService.updateDeadlineActivity(id, endTime);
+		String result = activityService.updateDeadlineActivity(id, endTime);
 		RestBody restBody = RestBody.success(result);
 		return ResponseEntity.ok(restBody);
 	}
@@ -143,8 +144,14 @@ public class ActivityController {
 	@GetMapping("getDataFromClassroomActivity")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Object> getDataFromClassroomActivity(@RequestParam("classroomActivityId") String classroomActivityId) throws Exception {
-		ActivityDTO activityDTO= activityService.getDataFromClassroomActivity(classroomActivityId);
+		ActivityDTO activityDTO = activityService.getDataFromClassroomActivity(classroomActivityId);
 		RestBody restBody = RestBody.success(activityDTO);
 		return ResponseEntity.ok(restBody);
 	}
+//
+//	@GetMapping("testSocket")
+//	public void testSocket(@RequestParam("message") String message) {
+//		simpMessagingTemplate.convertAndSend("/topic/user", message);
+//
+//	}
 }
