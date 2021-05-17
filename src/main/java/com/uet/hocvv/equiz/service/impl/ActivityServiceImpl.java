@@ -4,6 +4,7 @@ import com.uet.hocvv.equiz.common.CommonMessage;
 import com.uet.hocvv.equiz.domain.entity.*;
 import com.uet.hocvv.equiz.domain.enu.ActivityType;
 import com.uet.hocvv.equiz.domain.enu.LevelType;
+import com.uet.hocvv.equiz.domain.enu.NotificationType;
 import com.uet.hocvv.equiz.domain.enu.UserType;
 import com.uet.hocvv.equiz.domain.request.*;
 import com.uet.hocvv.equiz.domain.response.ActivityDTO;
@@ -27,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ActivityServiceImpl implements ActivityService {
@@ -50,6 +52,12 @@ public class ActivityServiceImpl implements ActivityService {
 	ClassroomActivityRepository classroomActivityRepository;
 	@Autowired
 	private SimpMessagingTemplate simpMessagingTemplate;
+	@Autowired
+	ClassroomStudentRepository classroomStudentRepository;
+	@Autowired
+	NotificationRepository notificationRepository;
+	@Autowired
+	ClassroomRepository classroomRepository;
 	
 	@Override
 	public ResponseListDTO getListActivityForTeacher(int pageIndex, int pageSize, SearchDTO searchDTO) throws Exception {
@@ -237,11 +245,34 @@ public class ActivityServiceImpl implements ActivityService {
 			classroomActivities.add(classroomActivity);
 		}
 		classroomActivityRepository.saveAll(classroomActivities);
-//		TODO: put notification for student in each classroom here
-		
+//		put notification for student in each classroom here
 		for (String classroomId : assignActivityRequest.getClassroomIds()) {
 			simpMessagingTemplate.convertAndSend("/notification/classroom/" + classroomId, "Bạn có thông báo mới");
 		}
+//		Create notification for each student in classroom.
+		List<ClassroomStudent> classroomStudentList = classroomStudentRepository.findByClassroomIdInAndDeletedIsFalse(assignActivityRequest.getClassroomIds());
+		List<Notification> newNotifications = new ArrayList<>();
+		List<Classroom> classrooms = classroomRepository.findByIdIn(assignActivityRequest.getClassroomIds());
+		Map<String, String> classroomMap = classrooms.stream().collect(Collectors.toMap(Classroom::getId, Classroom::getName));
+		
+		User user = userRepository.findById(assignActivityRequest.getUserId()).orElse(new User());
+		for (ClassroomStudent classroomStudent : classroomStudentList) {
+			Notification notification = new Notification();
+			notification.setRead(false);
+			notification.setImage(user.getAvatar());
+			notification.setObjectId(classroomStudent.getClassroomId());
+			notification.setType(NotificationType.ASSIGNMENT);
+			notification.setUserId(classroomStudent.getUserId());
+			notification.setContent("<b>"
+					+ user.getFullName()
+					+ "</b> đã thêm hoạt động <b>"
+					+ assignActivityRequest.getActivityName()
+					+ "</b> cho lớp học <b>"
+					+ classroomMap.get(classroomStudent.getClassroomId())
+					+ "</b>.");
+			newNotifications.add(notification);
+		}
+		notificationRepository.saveAll(newNotifications);
 		return CommonMessage.SUCCESS.name();
 	}
 	

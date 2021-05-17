@@ -19,4 +19,6 @@ public interface ClassroomStudentRepository extends MongoRepository<ClassroomStu
 	
 	ClassroomStudent findByUserIdAndStudentIdAndClassroomIdAndDeletedIsFalse(String userId, String studentId, String classroomId);
 	
+	List<ClassroomStudent> findByClassroomIdInAndDeletedIsFalse(List<String> classroomIds);
+	
 }

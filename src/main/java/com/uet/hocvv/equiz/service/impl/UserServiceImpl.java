@@ -2,6 +2,7 @@ package com.uet.hocvv.equiz.service.impl;
 
 import com.uet.hocvv.equiz.common.CommonMessage;
 import com.uet.hocvv.equiz.config.security.CustomUserDetails;
+import com.uet.hocvv.equiz.domain.entity.Notification;
 import com.uet.hocvv.equiz.domain.entity.Student;
 import com.uet.hocvv.equiz.domain.entity.Teacher;
 import com.uet.hocvv.equiz.domain.entity.User;
@@ -11,7 +12,10 @@ import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
 import com.uet.hocvv.equiz.domain.request.ForgotPasswordRequest;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
 import com.uet.hocvv.equiz.domain.request.UpdateUserInfoRequest;
+import com.uet.hocvv.equiz.domain.response.NotificationDTO;
+import com.uet.hocvv.equiz.domain.response.ResponseListDTO;
 import com.uet.hocvv.equiz.domain.response.UserDTO;
+import com.uet.hocvv.equiz.repository.NotificationRepository;
 import com.uet.hocvv.equiz.repository.StudentRepository;
 import com.uet.hocvv.equiz.repository.TeacherRepository;
 import com.uet.hocvv.equiz.repository.UserRepository;
@@ -23,6 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -52,6 +59,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 	String prefixUrl;
 	@Value("${default.password.user}")
 	String defaultPassword;
+	@Autowired
+	NotificationRepository notificationRepository;
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 	
@@ -211,7 +220,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			}
 			teacher.setAddress(updateUserInfoRequest.getAddress());
 			teacher.setPhone(updateUserInfoRequest.getPhone());
-			if(updateUserInfoRequest.getGender() != null) {
+			if (updateUserInfoRequest.getGender() != null) {
 				teacher.setGender(GenderType.valueOf(updateUserInfoRequest.getGender()));
 			}
 			teacher.setEmail(updateUserInfoRequest.getEmail());
@@ -225,7 +234,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 			if (student == null) {
 				throw new Exception(CommonMessage.USER_NOT_FOUND.name());
 			}
-			if(updateUserInfoRequest.getGender() != null) {
+			if (updateUserInfoRequest.getGender() != null) {
 				student.setGender(GenderType.valueOf(updateUserInfoRequest.getGender()));
 			}
 			student.setAddress(updateUserInfoRequest.getAddress());
@@ -249,6 +258,49 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		}
 		User user = userOptional.get();
 		return populateUserInfo(user.getUsername());
+	}
+	
+	@Override
+	public ResponseListDTO getNotifications(String userId, int pageIndex, int pageSize) {
+		
+		Sort sort = Sort.by("createdDate").descending();
+		Pageable pageable = PageRequest.of(pageIndex, pageSize, sort);
+		
+		List<Notification> notifications = notificationRepository.findByUserIdAndDeletedIsFalse(userId, pageable);
+		if (notifications == null) {
+			return new ResponseListDTO(null, 0);
+		}
+		List<NotificationDTO> notificationDTOS = new ArrayList<>();
+		for (Notification notification : notifications) {
+			notificationDTOS.add(modelMapper.map(notification, NotificationDTO.class));
+		}
+		int total = notificationRepository.countByUserIdAndDeletedIsFalse(userId);
+		return new ResponseListDTO(notificationDTOS, total);
+	}
+	
+	@Override
+	public String updateListNotification(String userId, String notificationId, Boolean updateAll, Boolean read) throws Exception {
+		if (updateAll) {
+			List<Notification> notifications = notificationRepository.findByUserIdAndReadIsFalse(userId);
+			if (notifications == null) {
+				return CommonMessage.SUCCESS.name();
+			}
+			for (Notification notification : notifications) {
+				notification.setRead(true);
+				notification.setUpdatedDate(new Date());
+			}
+			notificationRepository.saveAll(notifications);
+		} else {
+			Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
+			if(!optionalNotification.isPresent()) {
+				throw new Exception(CommonMessage.NOT_FOUND.name());
+			}
+			Notification notification = optionalNotification.get();
+			notification.setRead(read);
+			notification.setUpdatedDate(new Date());
+			notificationRepository.save(notification);
+		}
+		return CommonMessage.SUCCESS.name();
 	}
 	
 	public UserDTO populateUserInfo(String username) throws Exception {
