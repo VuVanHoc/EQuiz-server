@@ -303,6 +303,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 		return CommonMessage.SUCCESS.name();
 	}
 	
+	@Override
+	public String deleteNotification(String id) throws Exception {
+		Optional<Notification> optionalNotification = notificationRepository.findById(id);
+		if(!optionalNotification.isPresent()) {
+			throw new Exception(CommonMessage.NOT_FOUND.name());
+		}
+		Notification notification = optionalNotification.get();
+		notification.setDeleted(true);
+		notification.setUpdatedDate(new Date());
+		notificationRepository.save(notification);
+		return CommonMessage.SUCCESS.name();
+	}
+	
 	public UserDTO populateUserInfo(String username) throws Exception {
 		User user = userRepository.findByUsername(username);
 		if (user == null) {

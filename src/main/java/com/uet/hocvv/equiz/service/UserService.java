@@ -41,4 +41,6 @@ public interface UserService {
 	ResponseListDTO getNotifications(String userId, int pageIndex, int pageSize) throws Exception;
 	
 	String updateListNotification(String userId, String notificationId, Boolean updateAll, Boolean read) throws Exception;
+	
+	String deleteNotification(String id) throws Exception;
 }

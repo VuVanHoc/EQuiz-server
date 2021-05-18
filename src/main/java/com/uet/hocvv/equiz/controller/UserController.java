@@ -94,4 +94,13 @@ public class UserController {
 		RestBody restBody = RestBody.success(result);
 		return ResponseEntity.ok(restBody);
 	}
+	
+	@DeleteMapping("deleteNotification/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ResponseEntity<Object> deleteNotification(@PathVariable("id") String id) throws Exception {
+		String result = userService.deleteNotification(id);
+		RestBody restBody = RestBody.success(result);
+		return ResponseEntity.ok(restBody);
+	}
 }
