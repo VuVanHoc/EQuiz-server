@@ -5,6 +5,7 @@ import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
 import com.uet.hocvv.equiz.domain.request.ForgotPasswordRequest;
 import com.uet.hocvv.equiz.domain.request.SignUpRequest;
 import com.uet.hocvv.equiz.domain.request.UpdateUserInfoRequest;
+import com.uet.hocvv.equiz.domain.response.ResponseListDTO;
 import com.uet.hocvv.equiz.domain.response.UserDTO;
 
 import java.util.List;
@@ -36,4 +37,10 @@ public interface UserService {
 	UserDTO updateUserInfo(UpdateUserInfoRequest updateUserInfoRequest) throws Exception;
 	
 	UserDTO getUserInfo(String userId) throws Exception;
+	
+	ResponseListDTO getNotifications(String userId, int pageIndex, int pageSize) throws Exception;
+	
+	String updateListNotification(String userId, String notificationId, Boolean updateAll, Boolean read) throws Exception;
+	
+	String deleteNotification(String id) throws Exception;
 }

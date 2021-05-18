@@ -11,5 +11,6 @@ public class AssignActivityRequest {
 	private String activityName;
 	private Long endTime;
 	private List<String> classroomIds;
+	private String userId;
 	
 }

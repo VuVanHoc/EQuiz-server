@@ -4,15 +4,16 @@ import com.uet.hocvv.equiz.domain.RestBody;
 import com.uet.hocvv.equiz.domain.request.ChangePasswordRequest;
 import com.uet.hocvv.equiz.domain.request.ForgotPasswordRequest;
 import com.uet.hocvv.equiz.domain.request.UpdateUserInfoRequest;
+import com.uet.hocvv.equiz.domain.response.ResponseListDTO;
 import com.uet.hocvv.equiz.domain.response.UserDTO;
+import com.uet.hocvv.equiz.repository.NotificationRepository;
 import com.uet.hocvv.equiz.service.UserService;
-import com.uet.hocvv.equiz.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import java.sql.ResultSet;
 
 @RestController
 @RequestMapping("api/user")
@@ -20,6 +21,8 @@ public class UserController {
 	
 	@Autowired
 	UserService userService;
+	@Autowired
+	NotificationRepository notificationRepository;
 	
 	@GetMapping("getAllUser")
 	public ResponseEntity<?> getUser() {
@@ -59,6 +62,45 @@ public class UserController {
 	public ResponseEntity<Object> getUserInfo(@PathVariable("id") String userId) throws Exception {
 		UserDTO userDTO = userService.getUserInfo(userId);
 		RestBody restBody = RestBody.success(userDTO);
+		return ResponseEntity.ok(restBody);
+	}
+	
+	@GetMapping("getNotifications")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ResponseEntity<Object> getNotifications(@RequestParam("userId") String userId,
+	                                               @RequestParam(value = "pageIndex", defaultValue = "0") int pageIndex,
+	                                               @RequestParam(value = "pageSize", defaultValue = "1000") int pageSize) throws Exception {
+		ResponseListDTO responseListDTO = userService.getNotifications(userId, pageIndex, pageSize);
+		RestBody restBody = RestBody.success(responseListDTO);
+		return ResponseEntity.ok(restBody);
+	}
+	@GetMapping("getNumberUnreadNotifications")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ResponseEntity<Object> getNumberUnreadNotifications(@RequestParam("userId") String userId) throws Exception {
+		int total = notificationRepository.countByUserIdAndReadIsFalseAndDeletedIsFalse(userId);
+		RestBody restBody = RestBody.success(total);
+		return ResponseEntity.ok(restBody);
+	}
+	@PostMapping("updateNotifications")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ResponseEntity<Object> updateNotifications(@RequestParam("userId") String userId,
+	                                                  @RequestParam("notificationId") String notificationId,
+	                                                  @RequestParam("updateAll") Boolean updateAll,
+	                                                  @RequestParam("read") Boolean read) throws Exception {
+		String result = userService.updateListNotification(userId, notificationId, updateAll, read);
+		RestBody restBody = RestBody.success(result);
+		return ResponseEntity.ok(restBody);
+	}
+	
+	@DeleteMapping("deleteNotification/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ResponseEntity<Object> deleteNotification(@PathVariable("id") String id) throws Exception {
+		String result = userService.deleteNotification(id);
+		RestBody restBody = RestBody.success(result);
 		return ResponseEntity.ok(restBody);
 	}
 }
