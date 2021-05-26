@@ -16,7 +16,8 @@ public class Question  extends BaseEntity{
 	private String content;
 	private QuestionType questionType;
 	private String createdBy; //userId
+	private String ownerId;
 	private String hint;
 	private LevelType level;
-	
+	private String subject;
 }

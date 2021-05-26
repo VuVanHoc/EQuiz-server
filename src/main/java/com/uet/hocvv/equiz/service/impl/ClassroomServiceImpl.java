@@ -61,14 +61,17 @@ public class ClassroomServiceImpl implements ClassroomService {
 		Teacher teacher = teacherRepository.findByUserId(searchDTO.getResponsibleId());
 		User user = userRepository.findById(searchDTO.getResponsibleId()).orElse(new User());
 		for (Classroom classroom : classrooms) {
+			int totalStudent = classroomStudentRepository.countClassroomStudentByClassroomId(classroom.getId());
 			ClassroomDTO classroomDTO = modelMapper.map(classroom, ClassroomDTO.class);
 			classroomDTO.setResponsiblePhone(teacher.getPhone());
 			classroomDTO.setResponsibleName(user.getFullName());
 			classroomDTO.setResponsibleEmail(teacher.getEmail());
 			classroomDTO.setResponsibleAvatar(user.getAvatar());
+			classroomDTO.setTotalStudent(totalStudent);
 			classroomDTOS.add(classroomDTO);
 		}
 		int total = classroomRepository.countByResponsibleAndDeleted(searchDTO.getResponsibleId(), false);
+		
 		return new ResponseListDTO(classroomDTOS, total);
 	}
 	
@@ -148,15 +151,15 @@ public class ClassroomServiceImpl implements ClassroomService {
 	public String studentJoinToClassroom(Join2ClassroomRequest join2ClassroomRequest) throws Exception {
 		
 		Classroom classroom = classroomRepository.findByCodeAndDeletedIsFalse(join2ClassroomRequest.getClassCode());
-		if(classroom == null) {
+		if (classroom == null) {
 			throw new Exception(CommonMessage.NOT_FOUND.name());
 		}
-		if(classroom.getPassword() != null &&  !classroom.getPassword().equals(join2ClassroomRequest.getPassword())) {
+		if (classroom.getPassword() != null && !classroom.getPassword().equals(join2ClassroomRequest.getPassword())) {
 			throw new Exception(CommonMessage.WRONG_PASSWORD_TO_JOIN.name());
 		}
 		ClassroomStudent classroomStudent = classroomStudentRepository.
 				findByUserIdAndStudentIdAndClassroomIdAndDeletedIsFalse(join2ClassroomRequest.getUserId(), join2ClassroomRequest.getStudentId(), classroom.getId());
-		if(classroomStudent != null) {
+		if (classroomStudent != null) {
 			throw new Exception(CommonMessage.ALREADY_JOINED_THIS_CLASSROOM.name());
 		}
 		classroomStudent = new ClassroomStudent();
@@ -184,7 +187,7 @@ public class ClassroomServiceImpl implements ClassroomService {
 	}
 	
 	public ClassroomDTO populateInfoForClassroom(Classroom classroom) {
-	 
+		
 		ClassroomDTO classroomDTO = modelMapper.map(classroom, ClassroomDTO.class);
 		
 		Teacher teacher = teacherRepository.findByUserId(classroom.getResponsible());

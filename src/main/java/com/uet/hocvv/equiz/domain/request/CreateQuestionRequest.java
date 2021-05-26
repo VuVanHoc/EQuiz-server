@@ -15,5 +15,5 @@ public class CreateQuestionRequest {
 	private String hint;
 	private List<AnswerDTO> answerList;
 	private String createdBy;
-	
+	private String subject;
 }
