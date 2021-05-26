@@ -13,9 +13,9 @@ public interface QuestionService {
 	
 	QuestionDTO createOrUpdate(CreateQuestionRequest createQuestionRequest) throws Exception;
 	
-	QuestionDTO getDetail(String id);
+	QuestionDTO getDetail(String id) throws Exception;
 	
-	String delete(String id);
+	String delete(String id) throws Exception;
 	
 	
 }
